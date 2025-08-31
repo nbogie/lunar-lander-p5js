@@ -430,8 +430,8 @@ function drawTerrain() {
 function drawLandingPadExtras() {
     for (let pad of world.terrain.landingPads) {
         drawLandingPadFuelTank(pad);
-        drawLandingPadFlagAt(pad.leftX);
-        drawLandingPadFlagAt(pad.leftX + pad.width);
+        // drawLandingPadFlagAt(pad.leftX);
+        // drawLandingPadFlagAt(pad.leftX + pad.width);
 
         drawLandingPadPlatform(pad);
         drawLandingPadLabel(pad);
@@ -468,16 +468,16 @@ function drawLandingPadFuelTank(pad) {
     const h = w / 2;
     const x = pad.leftX + pad.width - w / 2;
     translate(x, getHeightAt(x) - h * 0.5 - 2);
-
-    fill(200);
+    fill(world.palette.skyBackground);
+    stroke(255);
     rectMode(CENTER);
     const cornerRadius = w / 6;
     rect(0, 0, w, h, cornerRadius);
     noStroke();
-    fill(100);
+    fill(255);
     textSize(7);
     textAlign(CENTER, CENTER);
-    text("FUEL " + floor(pad.fuel * 100), 0, 0);
+    text("FUEL " + floor(pad.fuel), 0, 0);
 
     //fuel tank legs
     [-10, 10].map((x) => {
