@@ -171,12 +171,16 @@ function restart() {
     respawnShip();
 }
 
-function drawPhysBody(b) {
+function drawBall(b) {
+    push();
+    noFill();
+    stroke(255);
     circle(b.position.x, b.position.y, 2 * b.circleRadius);
+
+    pop();
 }
 function draw() {
     background(40);
-    world.bodies.forEach(drawPhysBody);
     updateShip();
     updateParticles();
     if (config.windEnabled) {
@@ -186,6 +190,7 @@ function draw() {
     drawStarfield();
     drawDistantPlanet();
     drawTerrain();
+    world.bodies.forEach(drawBall);
     drawParticles();
     drawShip(world.ship);
     world.explosions.forEach(drawExplosion);
@@ -931,7 +936,8 @@ function drawDistantPlanet() {
     const y = getHeightAt(x) + frameCount / 100;
     push();
     translate(x, y);
-    fill(world.palette[4]);
+    fill(40);
+    stroke(world.palette[4]);
     circle(0, 0, 200);
     pop();
 }
