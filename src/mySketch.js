@@ -99,6 +99,7 @@ function createPhysicsBodies(world) {
 function createBodyForTerrain(world) {
     //if poly-decomp is loaded by the browser (with a script tag), a global variable "decomp" will be available
     Common.setDecomp(decomp);
+    console.log({ decomp: Common.decomp });
     //or for other packaging methods
     // Common.setDecomp(require("poly-decomp"));
     const verticesFromTerrain = world.terrain.points.map(({ x, y }) => ({
@@ -106,20 +107,25 @@ function createBodyForTerrain(world) {
         y,
     }));
 
+    const yMax = height + 200;
+    const leftmostY = verticesFromTerrain.at(0).y;
+    const rightmostY = verticesFromTerrain.at(-1).y;
+
     const vertexSets = [
         [
             ...verticesFromTerrain,
-            { x: width + 100, y: height / 2 },
-            { x: width + 100, y: height + 200 },
-            //extra vertices, in case this helps the polygon decomposition.
+            //add vertices to complete an area that extends beyond the screen bounds
+            { x: width + 100, y: rightmostY },
+            { x: width + 100, y: yMax },
+            //generate a line of extra vertices along the bottom, in case this helps the polygon decomposition.
             ...[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0].map((d) => ({
                 x: width * (d / 10),
-                y: height + 200,
+                y: yMax,
             })),
-            { x: -100, y: height + 200 },
-            { x: -100, y: height / 2 },
+            { x: -100, y: yMax },
+            { x: -100, y: leftmostY },
         ],
-    ]; //[dummyVertices];
+    ];
 
     const terrainBody = Bodies.fromVertices(
         0,
@@ -147,13 +153,18 @@ function createBodyForTerrain(world) {
             (terrainBody.bounds.min.y - targetPositionY),
     });
 
+    console.log("num parts in terrain: " + terrainBody.parts.length);
     if (!terrainBody) {
-        throw new Error("Unexpected falsy terrain body");
+        throw new Error(
+            "Unexpected falsy terrain body - perhaps the vertices could not be decomposed into convex bodies?"
+        );
     }
     return terrainBody;
 }
 function restart() {
+    //config.seed = 1756680251196;
     config.seed = round(new Date());
+    console.log({ seed: config.seed });
     noiseSeed(config.seed);
 
     world = createWorld();
