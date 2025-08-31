@@ -75,6 +75,7 @@ function setup() {
     createCanvas(windowWidth, windowHeight / 2);
     setupMatterJS();
     frameRate(60);
+    textFont("Courier New");
     postInstructionalMessages();
     restart();
 }
