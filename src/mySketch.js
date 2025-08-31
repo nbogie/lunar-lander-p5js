@@ -52,7 +52,6 @@ let config = {
     refuelPerTick: 0.0035,
     windEnabled: true,
     numWindParticles: 500,
-    starBodyRadius: 15,
 };
 
 function setupMatterJS() {
@@ -88,8 +87,7 @@ function createPhysicsBodies(world) {
     };
     console.log({ w: engine.world });
     const starBodies = world.stars.map((star) =>
-        // Bodies.polygon(star.pos.x, 0, 5, config.starBodyRadius, bodyOptions)
-        Bodies.circle(star.pos.x, 0, config.starBodyRadius, bodyOptions)
+        Bodies.circle(star.pos.x, 0, 10, bodyOptions)
     );
     const terrainBody = createBodyForTerrain(world);
     const allBodies = [...starBodies, terrainBody];
@@ -123,8 +121,6 @@ function createBodyForTerrain(world) {
         ],
     ]; //[dummyVertices];
 
-    const lowestYVal = min(vertexSets[0].map((pt) => pt.y));
-
     const terrainBody = Bodies.fromVertices(
         0,
         0,
@@ -136,8 +132,10 @@ function createBodyForTerrain(world) {
     );
 
     // Correct the position of the terrain body
-    const targetPositionX = -100; // The desired x-coordinate for the terrain's top-left corner
-    const targetPositionY = lowestYVal; // The desired y-coordinate for the terrain's top-left corner
+    const lowestYVal = min(vertexSets[0].map((pt) => pt.y));
+    const lowestXVal = min(vertexSets[0].map((pt) => pt.x));
+    const targetPositionX = lowestXVal; // The x-coordinate for the terrain's  desired top-left corner
+    const targetPositionY = lowestYVal;
 
     // Use Matter.Body.setPosition to move the body
     Matter.Body.setPosition(terrainBody, {
@@ -163,7 +161,7 @@ function restart() {
 }
 
 function drawPhysBody(b) {
-    circle(b.position.x, b.position.y, 2 * config.starBodyRadius);
+    circle(b.position.x, b.position.y, 2 * b.circleRadius);
 }
 function draw() {
     background(40);
