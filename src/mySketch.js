@@ -180,7 +180,7 @@ function drawBall(b) {
     pop();
 }
 function draw() {
-    background(40);
+    background(world.palette.skyBackground);
     updateShip();
     updateParticles();
     if (config.windEnabled) {
@@ -259,7 +259,7 @@ function createThrustParticle(pos, vel) {
         isDead: false,
         startFrame: frameCount,
         maxAge: random(60, 120),
-        colour: random(world.palette),
+        colour: random(world.palette.arr),
         size: random(0.8, 1),
     };
 }
@@ -280,11 +280,8 @@ function drawExplosion(explosion) {
     const numPts = random(3, 7);
     beginShape();
     noStroke();
-    fill(world.ship.colour);
-    if (random() < 0.5) {
-        colorMode(HSB);
-        fill(random(0, 50), 100, 100, 50);
-    }
+    colorMode(HSB);
+    fill(random(0, 50), 100, 100, 50);
 
     for (let i = 0; i < numPts; i++) {
         const radius = map(
@@ -400,8 +397,8 @@ function drawWindParticle(p) {
 
 function drawTerrain() {
     push();
-    fill(40);
-    stroke(world.palette[6]);
+    fill(world.palette.landBackground);
+    stroke(world.palette.arr[6]);
 
     // push()
     // strokeWeight(5)
@@ -501,7 +498,7 @@ function drawLandingPadFlagAt(x) {
     translate(x, getHeightAt(x) - flagHeight);
     stroke("white");
     line(0, 0, 0, flagHeight);
-    fill(world.palette[0]);
+    fill(world.palette.arr[0]);
     triangle(0, 0, flagWidth, 5, 0, 10);
     pop();
 }
@@ -539,7 +536,7 @@ function drawShip(ship) {
     translate(ship.pos);
     drawShipOverlay(ship);
     rotate(ship.facing);
-
+    stroke(255);
     fill(ship.colour);
     rectMode(CENTER);
     rect(0, 0, ship.height, ship.height * 1.5);
@@ -626,7 +623,7 @@ function updateShip() {
 
     if (landingCheck.type === "warning") {
         push();
-        fill(world.palette[5]);
+        fill(world.palette.arr[5]);
         noStroke();
         textSize(18);
         text(landingCheck.reason, 200, 200);
@@ -799,7 +796,7 @@ function createWorld() {
 
 function createPalette() {
     // Kjetil Golid's "Tundra3" https://chromotome-quicker.netlify.app/
-    return [
+    const arr = [
         "#87c3ca",
         "#7b7377",
         "#b2475d",
@@ -808,6 +805,11 @@ function createPalette() {
         "#d9c67a",
         "#f3f2f2",
     ];
+    return {
+        arr, //the loose colours
+        skyBackground: 20,
+        landBackground: 20,
+    };
 }
 
 function createShip(palette) {
@@ -818,7 +820,7 @@ function createShip(palette) {
         facing: -PI / 2,
         desiredFacing: -PI / 2,
         fuel: 1,
-        colour: palette[5],
+        colour: palette.skyBackground, //arr[5]
     };
 }
 // 110 should snap to 120 for 30 and 40
@@ -832,7 +834,7 @@ function createLandingPads(palette) {
     const createOnePad = ({ frac, name }) => ({
         leftX: snapTo(frac * width, config.xStep),
         width: config.padWidth,
-        colour: random(palette),
+        colour: random(palette.arr),
         fuel: 4,
         maxFuel: 4,
         name,
@@ -936,8 +938,8 @@ function drawDistantPlanet() {
     const y = getHeightAt(x) + frameCount / 100;
     push();
     translate(x, y);
-    fill(40);
-    stroke(world.palette[4]);
+    fill(world.palette.skyBackground);
+    stroke(world.palette.arr[4]);
     circle(0, 0, 200);
     pop();
 }
