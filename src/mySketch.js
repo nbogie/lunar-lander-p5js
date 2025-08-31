@@ -280,9 +280,10 @@ function drawExplosion(explosion) {
     push();
     const numPts = random(3, 7);
     beginShape();
-    noStroke();
+    noFill();
+    // fill(world.palette.skyBackground);
     colorMode(HSB);
-    fill(random(0, 50), 100, 100, 50);
+    stroke(random(0, 50), 100, 100, 50);
 
     for (let i = 0; i < numPts; i++) {
         const radius = map(
