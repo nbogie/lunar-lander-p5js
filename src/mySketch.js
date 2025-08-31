@@ -52,6 +52,7 @@ let config = {
     refuelPerTick: 0.0035,
     windEnabled: true,
     numWindParticles: 500,
+    starBodyRadius: 15,
 };
 
 function setupMatterJS() {
@@ -87,7 +88,8 @@ function createPhysicsBodies(world) {
     };
     console.log({ w: engine.world });
     const starBodies = world.stars.map((star) =>
-        Bodies.polygon(star.pos.x, 0, 5, 14, bodyOptions)
+        // Bodies.polygon(star.pos.x, 0, 5, config.starBodyRadius, bodyOptions)
+        Bodies.circle(star.pos.x, 0, config.starBodyRadius, bodyOptions)
     );
     const terrainBody = createBodyForTerrain(world);
     const allBodies = [...starBodies, terrainBody];
@@ -106,37 +108,47 @@ function createBodyForTerrain(world) {
         y,
     }));
 
-    console.log({ width, height });
-    const dummyVertices = [
-        [0, 0],
-        [200, 600],
-        [220, 100],
-        [500, 500.4],
-        [550, 100],
-    ].map(([x, y]) => ({
-        x,
-        y,
-    }));
-
     const vertexSets = [
-        { x: width / 2, y: height + 200 },
-        { x: -100, y: height + 200 },
-        { x: -100, y: height / 2 },
-        ...verticesFromTerrain,
-        { x: width + 100, y: height / 2 },
-        { x: width + 100, y: height + 200 },
-        { x: width / 2, y: height + 200 },
+        [
+            ...verticesFromTerrain,
+            { x: width + 100, y: height / 2 },
+            { x: width + 100, y: height + 200 },
+            //extra vertices, in case this helps the polygon decomposition.
+            ...[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0].map((d) => ({
+                x: width * (d / 10),
+                y: height + 200,
+            })),
+            { x: -100, y: height + 200 },
+            { x: -100, y: height / 2 },
+        ],
     ]; //[dummyVertices];
 
+    const lowestYVal = min(vertexSets[0].map((pt) => pt.y));
+
     const terrainBody = Bodies.fromVertices(
-        width / 2,
-        height / 2,
+        0,
+        0,
         vertexSets,
         {
             isStatic: true,
         },
         true
     );
+
+    // Correct the position of the terrain body
+    const targetPositionX = -100; // The desired x-coordinate for the terrain's top-left corner
+    const targetPositionY = lowestYVal; // The desired y-coordinate for the terrain's top-left corner
+
+    // Use Matter.Body.setPosition to move the body
+    Matter.Body.setPosition(terrainBody, {
+        x:
+            terrainBody.position.x -
+            (terrainBody.bounds.min.x - targetPositionX),
+        y:
+            terrainBody.position.y -
+            (terrainBody.bounds.min.y - targetPositionY),
+    });
+
     if (!terrainBody) {
         throw new Error("Unexpected falsy terrain body");
     }
@@ -151,10 +163,10 @@ function restart() {
 }
 
 function drawPhysBody(b) {
-    circle(b.position.x, b.position.y, 15);
+    circle(b.position.x, b.position.y, 2 * config.starBodyRadius);
 }
 function draw() {
-    background("pink");
+    background(40);
     world.bodies.forEach(drawPhysBody);
     updateShip();
     updateParticles();
@@ -832,21 +844,10 @@ function zipWith(arrA, arrB, joinFn) {
 }
 
 function createTerrain(palette) {
-    const boundingBox = {
-        leftX: 200,
-        rightX: width - 200,
-        width: width - 400,
-    };
-
     const landingPads = createLandingPads(palette);
     const pts = [];
     let prevY = null;
-    // for (
-    //     let x = boundingBox.leftX - config.xStep;
-    //     x < boundingBox.rightX + config.xStep;
-    //     x += config.xStep
-    // ) {
-    for (let x = -config.xStep; x < width + config.xStep; x += config.xStep) {
+    for (let x = -config.xStep; x <= width + config.xStep; x += config.xStep) {
         const noiseY = map(
             noise(2000 + x / 300),
             0.15,
