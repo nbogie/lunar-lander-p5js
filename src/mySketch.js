@@ -145,7 +145,7 @@ function createThrustParticle(pos, vel) {
         startFrame: frameCount,
         maxAge: random(60, 120),
         colour: random(world.palette.arr),
-        size: random(0.8, 1),
+        size: random([1, 2]),
     };
 }
 
@@ -251,9 +251,10 @@ function drawParticles() {
 
 function drawParticle(p) {
     push();
-    stroke(p.colour);
-    strokeWeight(p.size);
-    point(p.pos.x, p.pos.y);
+    fill(p.colour);
+    noStroke();
+    rectMode(CENTER);
+    square(p.pos.x, p.pos.y, p.size);
     pop();
 }
 
@@ -267,7 +268,7 @@ function createWindParticle() {
     return {
         pos,
         vel: createWindAt(pos),
-        size: random(0.5, 1),
+        size: 1,
         colour: generateSubtleWindColour(),
         rainbowColour: generateRainbowWindColour(),
     };
@@ -282,7 +283,7 @@ function generateRainbowWindColour() {
 }
 
 function generateSubtleWindColour() {
-    return random(["rgba(195,228,242)", "rgba(211,211,211)"]);
+    return random([150, 100]);
 }
 
 function drawWindParticle(p) {
@@ -461,7 +462,7 @@ function updateShip() {
             world.ship.fuel = constrain(world.ship.fuel + amtTransferred, 0, 1);
             pad.fuel = constrain(pad.fuel - amtTransferred, 0, pad.maxFuel);
             if (world.ship.fuel >= 1) {
-                postMessage("Refuelling complete.");
+                postMessage("Refuelling complete");
             }
         }
     }
@@ -480,7 +481,7 @@ function updateShip() {
                     thrustVec
                         .copy()
                         .rotate(randomGaussian(PI, PI / 20))
-                        .setMag(0.9)
+                        .setMag(1.5)
                 )
             );
             if (world.state.type === "landed") {
@@ -535,7 +536,7 @@ function updateShip() {
         spawnExplosion(world.ship.pos.copy());
         respawnShip();
         world.screenShakeAmt = 1;
-        postMessage("cause of crash: " + landingCheck.reason + ".");
+        postMessage("cause of crash: " + landingCheck.reason);
     }
 }
 
@@ -654,7 +655,7 @@ function setLandedShip(ship) {
     //(no immediate refuel)
 
     const pad = landingPadAtXOrNull(ship.pos.x);
-    postMessage("Landed at " + pad.name + " base.");
+    postMessage("Landed at " + pad.name + " base");
 }
 
 function setShipUprightImmediately(ship) {
@@ -856,6 +857,9 @@ function keyPressed() {
     if (key === "d") {
         toggleConfigBoolean("debugMessagesEnabled", "debug messages");
     }
+    if (key === "m") {
+        world.messages = [];
+    }
 
     if (key === "s") {
         toggleConfigBoolean("screenShakeEnabled", "screen-shake");
@@ -868,18 +872,19 @@ function keyPressed() {
 function toggleConfigBoolean(key, label) {
     config[key] = !config[key];
     const desc = config[key] ? "enabled" : "disabled";
-    postMessage(label + " " + desc + ".");
+    postMessage(label + " " + desc);
 }
 
 function postInstructionalMessages() {
     const msgs = [
-        "Arrows to rotate.",
-        "up arrow to thrust.",
-        "'R' to restart / regenerate.",
-        "'w' to toggle wind.",
-        "'c' to toggle rainbow wind.",
-        "'d' to toggle debug text.",
-        "'h' for help.",
+        "Arrows to rotate",
+        "up arrow to thrust",
+        "'R' to restart / regenerate",
+        "'w' to toggle wind",
+        "'c' to toggle rainbow wind",
+        "'d' to toggle debug text",
+        "'m' to clear messages",
+        "'h' for help",
     ];
     let delayMs = 0;
     const spacingMs = 1500;
