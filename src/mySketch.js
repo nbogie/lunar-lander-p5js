@@ -1,3 +1,4 @@
+"use strict";
 /*
 	Lunar Lander #WCCChallenge "Pump"
 	https://openprocessing.org/sketch/2711492
@@ -538,6 +539,7 @@ function drawShip(ship) {
 
     stroke(255);
     fill(ship.colour);
+    noFill();
     rectMode(CENTER);
     rect(0, 0, mainBodyHeight * 0.8, mainBodyHeight);
 
@@ -598,21 +600,7 @@ function updateShip() {
 
     if (keyIsDown(UP_ARROW)) {
         if (world.ship.fuel > 0) {
-            const thrustVec = p5.Vector.fromAngle(
-                world.ship.facing,
-                config.thrust
-            );
-            world.ship.vel.add(thrustVec);
-            world.ship.fuel -= config.fuelUsedPerTick;
-            world.particles.push(
-                createThrustParticle(
-                    world.ship.pos,
-                    thrustVec
-                        .copy()
-                        .rotate(randomGaussian(PI, PI / 20))
-                        .setMag(1.5)
-                )
-            );
+            fireThrusters();
             if (world.state.type === "landed") {
                 world.state = {
                     type: "flying",
@@ -672,6 +660,54 @@ function updateShip() {
             postMessage("cause of crash: " + landingCheck.reason);
         }
     }
+}
+
+function fireThrusters() {
+    const thrustVec = p5.Vector.fromAngle(world.ship.facing, config.thrust);
+    world.ship.vel.add(thrustVec);
+    world.ship.fuel -= config.fuelUsedPerTick;
+    addParticleEffectsFromThrusters(thrustVec);
+}
+
+function addParticleEffectsFromThrusters(thrustVec) {
+    //Currently the body of the ship gets drawn rotated by -PI/2.  These offsets reflect that.
+    const thrusterOffsets = [createVector(-10, 10), createVector(-10, -10)];
+
+    thrusterOffsets.forEach((thrusterOffset) => {
+        const rotatedThrustEmitterPos = getRotatedPositionOfOffsetPoint(
+            world.ship.pos,
+            world.ship.facing,
+            thrusterOffset
+        );
+
+        world.particles.push(
+            createThrustParticle(
+                rotatedThrustEmitterPos,
+                thrustVec
+                    .copy()
+                    .rotate(randomGaussian(PI, PI / 20))
+                    .setMag(1.5)
+            )
+        );
+    });
+}
+
+/**
+ * Calculates the world-space coordinates of a point on a rotated body,
+ * given its local offset from the rotated body's centre.
+ * @param {p5.Vector} parentPos The parent's world-space position vector.
+ * @param {number} parentRotation The parent body's rotation in radians.
+ * @param {p5.Vector} relativePosition The point's local offset from the centre of the parent body
+ * @returns {p5.Vector} A new vector representing the point's world-space coordinates after following the body's rotation.
+ */
+function getRotatedPositionOfOffsetPoint(
+    parentPos,
+    parentRotation,
+    relativePosition
+) {
+    let rotatedOffset = relativePosition.copy();
+    rotatedOffset.rotate(parentRotation);
+    return p5.Vector.add(parentPos, rotatedOffset);
 }
 
 function createWindAt(pos) {
