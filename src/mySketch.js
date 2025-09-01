@@ -216,7 +216,7 @@ function drawDebugText() {
     });
 
     outputs.push({
-        t: "tilt " + degrees(getAngleFromLevel(world.ship)).toFixed(0),
+        t: "tilt " + degrees(getTiltAngle(world.ship)).toFixed(0),
     });
 
     outputs.push({
@@ -396,6 +396,40 @@ function drawLandingPadFlagAt(x) {
     pop();
 }
 
+function drawShip(ship) {
+    function drawBooster() {
+        rect(-8, 0, 5, 5);
+    }
+
+    const mainBodyHeight = ship.height * 0.8;
+
+    push();
+    translate(ship.pos);
+    drawShipOverlay(ship);
+    rotate(ship.facing);
+
+    stroke(255);
+    fill(ship.colour);
+    rectMode(CENTER);
+    rect(0, 0, mainBodyHeight * 0.8, mainBodyHeight);
+
+    //debug ship height
+    // noFill();
+    // stroke("lime");
+    // rect(0, 0, ship.height, ship.height);
+
+    //boosters
+    push();
+    translate(-4, -10);
+    drawBooster();
+    pop();
+    push();
+    translate(-4, 10);
+    drawBooster();
+    pop();
+
+    pop();
+}
 function drawShipOverlay(ship) {
     push();
     translate(0, -20);
@@ -420,32 +454,6 @@ function drawFuelBar(ship) {
     // text("F:" + ((ship.fuel * 100).toFixed(1)) + "%", 0, 0)
 }
 
-function drawShip(ship) {
-    function drawBooster() {
-        rect(-8, 0, 5, 5);
-    }
-
-    push();
-    translate(ship.pos);
-    drawShipOverlay(ship);
-    rotate(ship.facing);
-    stroke(255);
-    fill(ship.colour);
-    rectMode(CENTER);
-    rect(0, 0, ship.height, ship.height * 1.5);
-    fill(150);
-    push();
-    translate(-4, -10);
-    drawBooster();
-    pop();
-    push();
-    translate(-4, 10);
-    drawBooster();
-    pop();
-
-    pop();
-}
-
 function updateShip() {
     if (world.state.type === "landed") {
         if (world.ship.fuel < 1) {
@@ -458,6 +466,7 @@ function updateShip() {
             }
         }
     }
+    let tookOffThisFrame = false;
 
     if (keyIsDown(UP_ARROW)) {
         if (world.ship.fuel > 0) {
@@ -480,6 +489,9 @@ function updateShip() {
                 world.state = {
                     type: "flying",
                 };
+                const pad = landingPadAtXOrNull(world.ship.pos.x);
+                postMessage("Lift off from " + pad.name + " base ");
+                tookOffThisFrame = true;
             }
         }
     }
@@ -508,27 +520,29 @@ function updateShip() {
     world.ship.vel.add(gravity);
     world.ship.pos.add(world.ship.vel);
 
-    const landingCheck = checkIsOkForLanding(world.ship);
-    if (landingCheck.result) {
-        setLandedShip(world.ship);
-        return;
-    }
+    if (!tookOffThisFrame) {
+        const landingCheck = checkIsOkForLanding(world.ship);
+        if (landingCheck.result) {
+            setLandedShip(world.ship);
+            return;
+        }
 
-    if (landingCheck.type === "warning") {
-        push();
-        fill(world.palette.arr[5]);
-        noStroke();
-        textSize(18);
-        text(landingCheck.reason, 200, 200);
-        pop();
-    }
+        if (landingCheck.type === "warning") {
+            push();
+            fill(world.palette.arr[5]);
+            noStroke();
+            textSize(18);
+            text(landingCheck.reason, 200, 200);
+            pop();
+        }
 
-    if (isUnderTerrain(world.ship.pos)) {
-        //todo: spawn an explosion at crash site
-        spawnExplosion(world.ship.pos.copy());
-        respawnShip();
-        world.screenShakeAmt = 1;
-        postMessage("cause of crash: " + landingCheck.reason);
+        if (isUnderTerrain(world.ship)) {
+            //todo: spawn an explosion at crash site
+            spawnExplosion(world.ship.pos.copy());
+            respawnShip();
+            world.screenShakeAmt = 1;
+            postMessage("cause of crash: " + landingCheck.reason);
+        }
     }
 }
 
@@ -568,10 +582,11 @@ function drawMessages() {
     push();
     translate(width - 50, 50);
     for (let m of world.messages) {
-        textSize(20);
+        textSize(17);
         textAlign(RIGHT);
         noStroke();
         fill("white");
+        // const timePrefix = +" at " + formatMillisecondsToMMSS(m.postTime);
         text(m.msg, 0, 0);
         translate(0, 30);
     }
@@ -583,6 +598,14 @@ function spawnExplosion(pos) {
         pos: pos.copy(),
         startFrame: frameCount,
     });
+}
+/**
+ * Returns the distance between base of ship and ground at ship's x pos.
+ * Negative clearance means the base of the ship is penetrating the ground.
+ * Doesn't consider rotation of the ship.
+ */
+function calcGroundClearance(ship) {
+    return getHeightAt(ship.pos.x) - ship.pos.y - ship.height / 2;
 }
 
 function checkIsOkForLanding(ship) {
@@ -600,24 +623,25 @@ function checkIsOkForLanding(ship) {
             reason: "not over landing pad",
         };
     }
-    const distAboveGround = getHeightAt(ship.pos.x) - ship.pos.y;
+    const groundClearance = calcGroundClearance(ship);
     if (ship.vel.y > 0.7) {
         return {
             result: false,
             type: "warning",
-            reason: "descent too fast",
+            reason: `descent too fast (${ship.vel.y.toFixed(2)})`,
         };
     }
 
     if (!isShipLevel(ship)) {
+        const angleDeg = degrees(getTiltAngle(ship)).toFixed(1);
         return {
             result: false,
             type: "warning",
-            reason: "not level",
+            reason: `not level (${angleDeg})`,
         };
     }
 
-    if (distAboveGround > -2 && distAboveGround < 10) {
+    if (groundClearance > -2 && groundClearance <= 0) {
         return {
             result: true,
         };
@@ -629,12 +653,29 @@ function checkIsOkForLanding(ship) {
     }
 }
 
-function getAngleFromLevel(ship) {
-    return ship.facing + PI / 2;
+function getTiltAngle(ship) {
+    return normalizeRotationAsTilt(ship.facing + PI / 2);
+}
+
+//converts a rotation in range -inf to +inf into range -179.999 to +180
+function normalizeRotationAsTilt(rawRotation) {
+    //into range -360 to +360
+    let normalized = rawRotation % TWO_PI;
+
+    //into range -179 to 180
+    if (normalized > PI) {
+        normalized -= TWO_PI;
+    }
+    //into range -179, 180
+    else if (normalized <= -PI) {
+        normalized += TWO_PI;
+    }
+
+    return normalized;
 }
 
 function isShipLevel(ship) {
-    return abs(getAngleFromLevel(ship)) < PI / 5;
+    return abs(getTiltAngle(ship)) < PI / 5;
 }
 
 function setLandedShip(ship) {
@@ -647,7 +688,7 @@ function setLandedShip(ship) {
     //(no immediate refuel)
 
     const pad = landingPadAtXOrNull(ship.pos.x);
-    postMessage("Landed at " + pad.name + " base");
+    postMessage("Landed at " + pad.name + " base ");
 }
 
 function setShipUprightImmediately(ship) {
@@ -705,7 +746,7 @@ function createShip(palette) {
     return {
         pos: createVector(width / 2, height / 2),
         vel: createVector(0, 0),
-        height: 20,
+        height: 30,
         facing: -PI / 2,
         desiredFacing: -PI / 2,
         fuel: 1,
@@ -810,8 +851,9 @@ function getHeightAt(x) {
     return map(x, ptBefore.x, ptAfter.x, ptBefore.y, ptAfter.y, true);
 }
 
-function isUnderTerrain(pos) {
-    return pos.y > getHeightAt(pos.x);
+function isUnderTerrain(ship) {
+    const clearance = calcGroundClearance(ship);
+    return clearance < -5;
 }
 
 function collect(n, fn) {
@@ -836,6 +878,9 @@ function drawDistantPlanet() {
 function keyPressed() {
     if (key === "R" || key === "r") {
         restart();
+    }
+    if (key === "l") {
+        cheatSetShipForEasyLanding(world.ship);
     }
 
     if (key === "w") {
@@ -913,4 +958,26 @@ function applyAnyScreenShake() {
 }
 function updateAnyScreenShake() {
     world.screenShakeAmt = constrain(world.screenShakeAmt - 0.01, 0, 1);
+}
+
+function cheatSetShipForEasyLanding(ship) {
+    const pad = random(world.terrain.landingPads);
+    ship.pos = createVector(
+        pad.leftX + pad.width / 2,
+        getHeightAt(pad.leftX) - 40 - ship.height / 2
+    );
+    setShipUprightImmediately(ship);
+    ship.vel = createVector(0, 0.5);
+    postMessage("cheat! easy landing prepared");
+    world.state = {
+        type: "flying",
+    };
+}
+
+function formatMillisecondsToMMSS(milliseconds) {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const pad = (val) => val.toString().padStart(2, "0");
+    return [minutes, seconds].map(pad).join(":");
 }
