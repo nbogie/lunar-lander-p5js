@@ -45,6 +45,7 @@ let config = {
     screenShakeEnabled: true,
     debugMessagesEnabled: true,
     rainbowWindEnabled: false,
+    drawSunAsLines: false,
 };
 
 function setup() {
@@ -72,7 +73,11 @@ function draw() {
     updateShip();
     updateParticles();
     drawStarfield();
-    drawDistantPlanet();
+    if (config.drawSunAsLines) {
+        drawSunOutline();
+    } else {
+        drawSunWithHorizontalLines();
+    }
     if (config.windEnabled) {
         world.windParticles.forEach(updateWindParticle);
         drawWind();
@@ -864,17 +869,40 @@ function collect(n, fn) {
     return arr;
 }
 
-function drawDistantPlanet() {
+function drawSunWithHorizontalLines() {
     const x = width * 0.6;
     const y = getHeightAt(x) + frameCount / 100;
     push();
-    translate(x, y);
+    translate(x, round(y));
+    const radius = 100;
     fill(world.palette.skyBackground);
-    stroke(world.palette.arr[4]);
-    circle(0, 0, 200);
+    noStroke();
+    // stroke(world.palette.arr[4]);
+    circle(0, 0, radius * 2);
+    const yStep = radius / 8;
+    for (let yOff = -radius + yStep / 2; yOff <= radius; yOff += yStep) {
+        const l = lengthOfCircleArc(radius, yOff);
+        stroke(world.palette.arr[4]);
+        strokeWeight(1);
+        line(-l / 2, round(yOff), l / 2, round(yOff));
+    }
     pop();
 }
 
+function drawSunOutline() {
+    const x = width * 0.6;
+    const y = getHeightAt(x) + frameCount / 100;
+    push();
+    translate(x, round(y));
+    const radius = 100;
+    fill(world.palette.skyBackground);
+    stroke(world.palette.arr[4]);
+    circle(0, 0, radius * 2);
+    pop();
+}
+function lengthOfCircleArc(radius, y) {
+    return 2 * sqrt(radius * radius - y * y);
+}
 function keyPressed() {
     if (key === "R" || key === "r") {
         restart();
@@ -904,6 +932,11 @@ function keyPressed() {
     if (key === "s") {
         toggleConfigBoolean("screenShakeEnabled", "screen-shake");
     }
+
+    if (key === "L") {
+        toggleConfigBoolean("drawSunAsLines", "draw sun as lines");
+    }
+
     if (key === "c") {
         toggleConfigBoolean("rainbowWindEnabled", "rainbow-wind");
     }
