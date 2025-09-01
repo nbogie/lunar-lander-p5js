@@ -31,16 +31,6 @@
 // * incorporate ideas from infinite golf game
 // * make wind visualisation more efficient (e.g. periodically spawn replacement short-lived wind particles across a loose grid to ensure coverage, rather than relying on coverage through large numbers)
 
-const Engine = Matter.Engine,
-    Runner = Matter.Runner,
-    Composites = Matter.Composites,
-    Composite = Matter.Composite,
-    Common = Matter.Common,
-    Bodies = Matter.Bodies;
-
-/** matter.js engine */
-let engine;
-
 let world;
 
 let config = {
@@ -58,29 +48,10 @@ let config = {
     rainbowWindEnabled: false,
     drawSunAsLines: false,
     matter: {
-        enabled: false,
-        debugRendererEnabled: true,
-    }, //needs restart
+        enabled: false, //sketch restart required
+        debugRendererEnabled: false, //sketch restart required
+    },
 };
-
-function setupMatterJS() {
-    engine = Engine.create();
-    config.matter.debugRendererEnabled && setupMatterJSDebugRenderer();
-    var runner = Runner.create();
-    Runner.run(runner, engine);
-}
-
-function setupMatterJSDebugRenderer() {
-    const renderFn = Matter.Render.create({
-        element: document.body,
-        engine: engine,
-        options: {
-            width,
-            height,
-        },
-    });
-    Matter.Render.run(renderFn);
-}
 
 function setup() {
     const mainCanvasHeight =
@@ -96,79 +67,6 @@ function setup() {
     restart();
 }
 
-function createInitialPhysicsBodies(world) {
-    const bodyOptions = {
-        frictionAir: 0,
-        friction: 0.0001,
-        restitution: 0.6,
-    };
-    const starBodies = world.stars.map((star) => Bodies.circle(star.pos.x, 0, 10, bodyOptions));
-    const terrainBody = createBodyForTerrain(world);
-    const allBodies = [...starBodies, terrainBody];
-    Composite.add(engine.world, allBodies);
-    return allBodies;
-}
-
-function createBodyForTerrain(world) {
-    //if poly-decomp is loaded by the browser (with a script tag), a global variable "decomp" will be available
-    Common.setDecomp(decomp);
-    //or for other packaging methods
-    // Common.setDecomp(require("poly-decomp"));
-    const verticesFromTerrain = world.terrain.points.map(({ x, y }) => ({
-        x,
-        y,
-    }));
-
-    const yMax = height + 200;
-    const leftmostY = verticesFromTerrain.at(0).y;
-    const rightmostY = verticesFromTerrain.at(-1).y;
-
-    const vertexSets = [
-        [
-            ...verticesFromTerrain,
-            //add vertices to complete an area that extends beyond the screen bounds
-            { x: width + 100, y: rightmostY },
-            { x: width + 100, y: yMax },
-            //generate a line of extra vertices along the bottom, in case this helps the polygon decomposition.
-            ...[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0].map((d) => ({
-                x: width * (d / 10),
-                y: yMax,
-            })),
-            { x: -100, y: yMax },
-            { x: -100, y: leftmostY },
-        ],
-    ];
-
-    const terrainBody = Bodies.fromVertices(
-        0,
-        0,
-        vertexSets,
-        {
-            isStatic: true,
-        },
-        true
-    );
-
-    // Correct the position of the terrain body
-    const lowestYVal = min(vertexSets[0].map((pt) => pt.y));
-    const lowestXVal = min(vertexSets[0].map((pt) => pt.x));
-    const targetPositionX = lowestXVal; // The x-coordinate for the terrain's  desired top-left corner
-    const targetPositionY = lowestYVal;
-
-    // Use Matter.Body.setPosition to move the body
-    Matter.Body.setPosition(terrainBody, {
-        x: terrainBody.position.x - (terrainBody.bounds.min.x - targetPositionX),
-        y: terrainBody.position.y - (terrainBody.bounds.min.y - targetPositionY),
-    });
-
-    console.log("num parts in terrain: " + terrainBody.parts.length);
-    if (!terrainBody) {
-        throw new Error(
-            "Unexpected falsy terrain body - perhaps the vertices could not be decomposed into convex bodies?"
-        );
-    }
-    return terrainBody;
-}
 function restart() {
     //config.seed = 1756680251196;
     config.seed = round(new Date());
@@ -204,7 +102,11 @@ function draw() {
         drawWind();
     }
     drawTerrain();
-    world.bodies.forEach(drawBall);
+
+    if (config.matter.enabled) {
+        world.bodies.forEach(drawBall);
+    }
+
     drawParticles();
     drawShip(world.ship);
     world.explosions.forEach(drawExplosion);
@@ -872,6 +774,7 @@ function createWorld() {
         const bodies = createInitialPhysicsBodies(createdWorld);
         createdWorld.bodies = bodies;
     }
+
     return createdWorld;
 }
 
