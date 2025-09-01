@@ -93,9 +93,9 @@ function draw() {
     updateParticles();
     drawStarfield();
     if (config.drawSunAsLines) {
-        drawSunOutline();
-    } else {
         drawSunWithHorizontalLines();
+    } else {
+        drawSunOutline();
     }
     if (config.windEnabled) {
         world.windParticles.forEach(updateWindParticle);
@@ -175,7 +175,7 @@ function createThrustParticle(pos, vel) {
         isDead: false,
         startFrame: frameCount,
         maxAge: random(60, 120),
-        colour: random(world.palette.arr),
+        colour: random(world.palette.all),
         size: random([1, 2]),
     };
 }
@@ -324,7 +324,7 @@ function drawTerrain() {
     strokeCap(SQUARE);
     strokeWeight(1);
     fill(world.palette.landBackground);
-    stroke(world.palette.arr[6]);
+    stroke(world.palette.all[6]);
 
     beginShape();
     for (let pt of world.terrain.points) {
@@ -410,7 +410,7 @@ function drawLandingPadFlagAt(x) {
     translate(x, getHeightAt(x) - flagHeight);
     stroke("white");
     line(0, 0, 0, flagHeight);
-    fill(world.palette.arr[0]);
+    fill(world.palette.all[0]);
     triangle(0, 0, flagWidth, 5, 0, 10);
     pop();
 }
@@ -534,7 +534,7 @@ function updateShip(ship) {
 
         if (landingCheck.type === "warning") {
             push();
-            fill(world.palette.arr[5]);
+            fill(world.palette.all[5]);
             noStroke();
             textSize(18);
             text(landingCheck.reason, 200, 200);
@@ -778,9 +778,10 @@ function createWorld() {
 
 function createPalette() {
     // Kjetil Golid's "Tundra3" https://chromotome-quicker.netlify.app/
-    const arr = ["#87c3ca", "#7b7377", "#b2475d", "#7d3e3e", "#eb7f64", "#d9c67a", "#f3f2f2"];
+    const all = ["#87c3ca", "#7b7377", "#b2475d", "#7d3e3e", "#eb7f64", "#d9c67a", "#f3f2f2"];
     return {
-        arr, //the loose colours
+        all, //the loose colours
+        bases: [0, 2, 4, 5].map((ix) => all[ix]),
         skyBackground: 20,
         landBackground: 20,
     };
@@ -803,22 +804,29 @@ function snapTo(val, increment) {
 }
 
 function createLandingPads(palette) {
-    const createOneLandingPad = ({ frac, name }) => ({
+    const createOneLandingPad = ({ frac, name, colour }) => ({
         leftX: snapTo(frac * width, config.xStep),
         width: config.padWidth,
-        colour: random(palette.arr),
+        colour,
         fuel: 4,
         maxFuel: 4,
         name,
     });
 
     const baseNames = shuffle(
-        "Able Baker Charlie Dog Easy Fox Lima Oscar Shiffman Whiskey".split(" ")
+        "Able Baker Charlie Dog Echo Fox Inigo Lima Oscar Tango Shiffman Whiskey".split(" ")
     );
-    return zipWith(baseNames, [0.2, 0.8], (name, frac) =>
+    const colours = shuffle([...palette.bases]);
+
+    const basePositionFractions = random([
+        [0.2, 0.8],
+        [0.2, 0.4, 0.8],
+    ]);
+    return zipWith(baseNames, basePositionFractions, (name, frac, ix) =>
         createOneLandingPad({
             name,
             frac,
+            colour: colours[ix % colours.length],
         })
     );
 }
@@ -827,7 +835,7 @@ function zipWith(arrA, arrB, joinFn) {
     const outputs = [];
     const shorterLen = min(arrA.length, arrB.length);
     for (let ix = 0; ix < shorterLen; ix++) {
-        const newElem = joinFn(arrA[ix], arrB[ix]);
+        const newElem = joinFn(arrA[ix], arrB[ix], ix);
         outputs.push(newElem);
     }
     return outputs;
@@ -907,12 +915,12 @@ function drawSunWithHorizontalLines() {
     const radius = 100;
     fill(world.palette.skyBackground);
     noStroke();
-    // stroke(world.palette.arr[4]);
+    // stroke(world.palette.all[4]);
     circle(0, 0, radius * 2);
     const yStep = radius / 8;
     for (let yOff = -radius + yStep / 2; yOff <= radius; yOff += yStep) {
         const l = lengthOfCircleArc(radius, yOff);
-        stroke(world.palette.arr[4]);
+        stroke(world.palette.all[4]);
         strokeWeight(1);
         line(-l / 2, round(yOff), l / 2, round(yOff));
     }
@@ -926,7 +934,7 @@ function drawSunOutline() {
     translate(x, round(y));
     const radius = 100;
     fill(world.palette.skyBackground);
-    stroke(world.palette.arr[4]);
+    stroke(world.palette.all[4]);
     circle(0, 0, radius * 2);
     pop();
 }
