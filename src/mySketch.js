@@ -298,29 +298,17 @@ function drawWindParticle(p) {
 
 function drawTerrain() {
     push();
+    strokeCap(SQUARE);
+    strokeWeight(1);
     fill(world.palette.landBackground);
     stroke(world.palette.arr[6]);
-
-    // push()
-    // strokeWeight(5)
-    // for (let x = 0; x < width; x += 5) {
-    // 	const y = getHeightAt(x);
-    // 	point(x, y)
-    // }
-    // pop()
 
     beginShape();
     for (let pt of world.terrain.points) {
         vertex(pt.x, pt.y);
-        // push()
-        // strokeWeight(10)
-        // stroke(pt.colour)
-        // point(pt.x, pt.y)
-        // pop()
     }
     vertex(width + 50, height + 50);
     vertex(-50, height + 50);
-    strokeWeight(1);
     endShape(CLOSE);
     pop();
 
