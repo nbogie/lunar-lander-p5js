@@ -18,6 +18,8 @@
 */
 
 // TODO:
+// * allow fuel-scooping "cosmic winds" (perhaps this is ship fuel or otherwise needed by bases)
+// *   paint wind areas by gas colour
 // * incorporate deltaTime to support any frameRate
 // * add pumping of oxygen or other gases or liquids?
 // * switch to using a physics engine (e.g. matter.js Bodies.fromVertices)
