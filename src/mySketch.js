@@ -728,7 +728,7 @@ function createLandingPads(palette) {
     });
 
     const baseNames = shuffle(
-        "Able Baker Charlie Dog Easy Fox Lima Oscar Whiskey Sierra".split(" ")
+        "Able Baker Charlie Dog Easy Fox Lima Oscar Shiffman Whiskey".split(" ")
     );
     return zipWith(baseNames, [0.2, 0.8], (name, frac) =>
         createOneLandingPad({
