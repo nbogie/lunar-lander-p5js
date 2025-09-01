@@ -89,7 +89,7 @@ function draw() {
     background(world.palette.skyBackground);
     push();
     config.screenShakeEnabled && applyAnyScreenShake();
-    updateShip();
+    updateShip(world.ship);
     updateParticles();
     drawStarfield();
     if (config.drawSunAsLines) {
@@ -471,14 +471,14 @@ function drawFuelBar(ship) {
     // text("F:" + ((ship.fuel * 100).toFixed(1)) + "%", 0, 0)
 }
 
-function updateShip() {
-    if (world.ship.state.type === "landed") {
-        if (world.ship.fuel < 1) {
-            const pad = landingPadAtXOrNull(world.ship.pos.x);
+function updateShip(ship) {
+    if (ship.state.type === "landed") {
+        if (ship.fuel < 1) {
+            const pad = landingPadAtXOrNull(ship.pos.x);
             const amtTransferred = config.refuelPerTick; // * deltaTime;
-            world.ship.fuel = constrain(world.ship.fuel + amtTransferred, 0, 1);
+            ship.fuel = constrain(ship.fuel + amtTransferred, 0, 1);
             pad.fuel = constrain(pad.fuel - amtTransferred, 0, pad.maxFuel);
-            if (world.ship.fuel >= 1) {
+            if (ship.fuel >= 1) {
                 postMessage("Refuelling complete");
             }
         }
@@ -486,47 +486,47 @@ function updateShip() {
     let tookOffThisFrame = false;
 
     if (keyIsDown(UP_ARROW)) {
-        if (world.ship.fuel > 0) {
+        if (ship.fuel > 0) {
             fireThrusters();
-            if (world.ship.state.type === "landed") {
-                world.ship.state = {
+            if (ship.state.type === "landed") {
+                ship.state = {
                     type: "flying",
                 };
-                const pad = landingPadAtXOrNull(world.ship.pos.x);
+                const pad = landingPadAtXOrNull(ship.pos.x);
                 postMessage("Lift off from " + pad.name + " base");
                 tookOffThisFrame = true;
             }
         }
     }
 
-    if (world.ship.state.type !== "landed") {
+    if (ship.state.type !== "landed") {
         if (keyIsDown(LEFT_ARROW)) {
-            world.ship.desiredFacing -= config.turnSpeed;
+            ship.desiredFacing -= config.turnSpeed;
         }
 
         if (keyIsDown(RIGHT_ARROW)) {
-            world.ship.desiredFacing += config.turnSpeed;
+            ship.desiredFacing += config.turnSpeed;
         }
     }
 
-    world.ship.facing = lerp(world.ship.facing, world.ship.desiredFacing, 0.1);
+    ship.facing = lerp(ship.facing, ship.desiredFacing, 0.1);
 
-    if (world.ship.state.type === "landed") {
+    if (ship.state.type === "landed") {
         return;
     }
 
     const gravity = createVector(0, 1).mult(config.gravity);
     if (config.windEnabled) {
-        const windSpeed = createWindAt(world.ship.pos);
-        world.ship.vel.x += windSpeed;
+        const windSpeed = createWindAt(ship.pos);
+        ship.vel.x += windSpeed;
     }
-    world.ship.vel.add(gravity);
-    world.ship.pos.add(world.ship.vel);
+    ship.vel.add(gravity);
+    ship.pos.add(ship.vel);
 
     if (!tookOffThisFrame) {
-        const landingCheck = checkIsOkForLanding(world.ship);
+        const landingCheck = checkIsOkForLanding(ship);
         if (landingCheck.result) {
-            setLandedShip(world.ship);
+            setLandedShip(ship);
             return;
         }
 
@@ -539,9 +539,9 @@ function updateShip() {
             pop();
         }
 
-        if (isUnderTerrain(world.ship)) {
+        if (isUnderTerrain(ship)) {
             //todo: spawn an explosion at crash site
-            spawnExplosion(world.ship.pos.copy());
+            spawnExplosion(ship.pos.copy());
             respawnShip();
             world.screenShakeAmt = 1;
             postMessage("cause of crash: " + landingCheck.reason);
