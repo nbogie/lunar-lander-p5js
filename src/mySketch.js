@@ -308,6 +308,9 @@ function generateSubtleWindColour() {
 
 function drawWindParticle(p) {
     const strength = createWindAt(p.pos);
+    if (strength === 0) {
+        return;
+    }
     push();
     stroke(config.rainbowWindEnabled ? p.rainbowColour : p.colour);
     strokeWeight(p.size);
