@@ -47,26 +47,44 @@ let config = {
     debugMessagesEnabled: true,
     rainbowWindEnabled: false,
     drawSunAsLines: false,
+    matter: {
+        enabled: true, //sketch restart required
+        debugRendererEnabled: false, //sketch restart required
+    },
 };
 
 function setup() {
-    createCanvas(windowWidth, windowHeight);
+    const mainCanvasHeight =
+        config.matter.enabled && config.matter.debugRendererEnabled
+            ? windowHeight / 2
+            : windowHeight;
+    createCanvas(windowWidth, mainCanvasHeight);
+
+    config.matter.enabled && setupMatterJS();
+    frameRate(60);
+    textFont("Courier New");
     postInstructionalMessages();
     restart();
-    frameRate(60);
-    // drawingContext.font = "24px 'Courier New', Courier, monospace";
-
-    textFont("Courier New");
 }
 
 function restart() {
+    //config.seed = 1756680251196;
     config.seed = round(new Date());
+    console.log({ seed: config.seed });
     noiseSeed(config.seed);
 
     world = createWorld();
     respawnShip();
 }
 
+function drawBall(b) {
+    push();
+    noFill();
+    stroke(255);
+    circle(b.position.x, b.position.y, 2 * b.circleRadius);
+
+    pop();
+}
 function draw() {
     background(world.palette.skyBackground);
     push();
@@ -84,6 +102,11 @@ function draw() {
         drawWind();
     }
     drawTerrain();
+
+    if (config.matter.enabled) {
+        world.bodies.forEach(drawBall);
+    }
+
     drawParticles();
     drawShip(world.ship);
     world.explosions.forEach(drawExplosion);
@@ -742,7 +765,6 @@ function createWorld() {
         stars: createStarfield(),
         messages: [],
         palette,
-        screenShakeAmt: 0,
     };
 }
 
