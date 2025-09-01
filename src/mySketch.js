@@ -68,9 +68,8 @@ function setup() {
 }
 
 function restart() {
-    //config.seed = 1756680251196;
+    //e.g. config.seed = 1756680251196;
     config.seed = round(new Date());
-    console.log({ seed: config.seed });
     noiseSeed(config.seed);
 
     world = createWorld();
@@ -814,7 +813,7 @@ function createLandingPads(palette) {
     });
 
     const baseNames = shuffle(
-        "Able Baker Charlie Dog Echo Fox Inigo Lima Oscar Tango Shiffman Whiskey".split(" ")
+        "Able Baker Charlie Dog Echo Fox Inigo Lima Oscar Patel Tango Shiffman Whiskey".split(" ")
     );
     const colours = shuffle([...palette.bases]);
 
@@ -942,14 +941,11 @@ function lengthOfCircleArc(radius, y) {
     return 2 * sqrt(radius * radius - y * y);
 }
 function keyPressed() {
-    if (key === "R" || key === "r") {
+    if (key === "r") {
         restart();
     }
     if (key === "p") {
         togglePause();
-    }
-    if (key === "l") {
-        cheatSetShipForEasyLanding(world.ship);
     }
 
     if (key === "w") {
@@ -957,12 +953,13 @@ function keyPressed() {
     }
 
     if (key === "h") {
-        postInstructionalMessages();
+        postInstructionalMessages({ all: true });
     }
 
     if (key === "d") {
         toggleConfigBoolean("debugMessagesEnabled", "debug messages");
     }
+
     if (key === "m") {
         world.messages = [];
     }
@@ -971,12 +968,20 @@ function keyPressed() {
         toggleConfigBoolean("screenShakeEnabled", "screen-shake");
     }
 
-    if (key === "L") {
+    if (key === "l") {
         toggleConfigBoolean("drawSunAsLines", "draw sun as lines");
     }
 
     if (key === "c") {
         toggleConfigBoolean("rainbowWindEnabled", "rainbow-wind");
+    }
+
+    if (key === "e") {
+        console.log({ seed: config.seed });
+    }
+
+    if (key === "x") {
+        cheatSetShipForEasyLanding(world.ship);
     }
 }
 
@@ -986,28 +991,35 @@ function toggleConfigBoolean(key, label) {
     postMessage(label + " " + desc);
 }
 
-function postInstructionalMessages() {
-    const msgs = [
-        "Arrows to rotate",
+function postInstructionalMessages({ all } = { all: false }) {
+    const coreMessages = [
+        "left & right arrows to rotate",
         "up arrow to thrust",
-        "'R' to restart / regenerate",
+        "'r' to restart / regenerate",
         "'w' to toggle wind",
-        "'c' to toggle rainbow wind",
-        "'d' to toggle debug text",
-        "'m' to clear messages",
-        "'h' for help",
+        "'h' for fuller help",
     ];
+
+    const otherMessages = [
+        "'p' to pause",
+        "'c' to toggle rainbow wind",
+        "'l' to toggle sun as lines",
+        "'d' to toggle debug text",
+        "'m' to clear these messages",
+    ];
+    const msgs = [...coreMessages, ...(all ? otherMessages : [])];
+
+    const spacingMs = 1000;
+    const duration = 10000;
     let delayMs = 0;
-    const spacingMs = 1500;
-    const duration = 15000;
     for (let msg of msgs) {
-        postDelayedMessage(msg, delayMs, duration);
+        postMessageLater(msg, delayMs, duration);
         delayMs += spacingMs;
     }
 }
 
-function postDelayedMessage(str, delay, durationMs) {
-    setTimeout(() => postMessage(str, durationMs), delay);
+function postMessageLater(str, delay, durationMs) {
+    return setTimeout(() => postMessage(str, durationMs), delay);
 }
 
 function applyAnyScreenShake() {
