@@ -48,7 +48,7 @@ let config = {
     rainbowWindEnabled: false,
     drawSunAsLines: false,
     matter: {
-        enabled: true, //sketch restart required
+        enabled: false, //sketch restart required
         debugRendererEnabled: false, //sketch restart required
     },
 };
@@ -753,7 +753,8 @@ function respawnShip() {
 
 function createWorld() {
     const palette = createPalette();
-    return {
+
+    const createdWorld = {
         state: {
             type: "flying", //landed | flying
         },
@@ -765,7 +766,16 @@ function createWorld() {
         stars: createStarfield(),
         messages: [],
         palette,
+        screenShakeAmt: 0,
+        bodies: [],
     };
+
+    if (config.matter.enabled) {
+        const bodies = createInitialPhysicsBodies(createdWorld);
+        createdWorld.bodies = bodies;
+    }
+
+    return createdWorld;
 }
 
 function createPalette() {
@@ -829,7 +839,7 @@ function createTerrain(palette) {
     const landingPads = createLandingPads(palette);
     const pts = [];
     let prevY = null;
-    for (let x = -config.xStep; x < width + 50; x += config.xStep) {
+    for (let x = -config.xStep; x < width + config.xStep; x += config.xStep) {
         const noiseY = map(noise(2000 + x / 300), 0.15, 0.85, height * 0.9, height * 0.3);
         let y = noiseY;
         const nearPad = isNearAnyLandingPad(x, landingPads);
