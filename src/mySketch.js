@@ -218,7 +218,7 @@ function isFrameRateSlow(expectedRate, tolerance) {
 
 function drawDebugText() {
     push();
-    const str = JSON.stringify(world.state);
+    const str = JSON.stringify(world.ship.state);
     const outputs = [];
     outputs.push({
         t: "FPS " + frameRate().toFixed(0),
@@ -472,7 +472,7 @@ function drawFuelBar(ship) {
 }
 
 function updateShip() {
-    if (world.state.type === "landed") {
+    if (world.ship.state.type === "landed") {
         if (world.ship.fuel < 1) {
             const pad = landingPadAtXOrNull(world.ship.pos.x);
             const amtTransferred = config.refuelPerTick; // * deltaTime;
@@ -488,8 +488,8 @@ function updateShip() {
     if (keyIsDown(UP_ARROW)) {
         if (world.ship.fuel > 0) {
             fireThrusters();
-            if (world.state.type === "landed") {
-                world.state = {
+            if (world.ship.state.type === "landed") {
+                world.ship.state = {
                     type: "flying",
                 };
                 const pad = landingPadAtXOrNull(world.ship.pos.x);
@@ -499,7 +499,7 @@ function updateShip() {
         }
     }
 
-    if (world.state.type !== "landed") {
+    if (world.ship.state.type !== "landed") {
         if (keyIsDown(LEFT_ARROW)) {
             world.ship.desiredFacing -= config.turnSpeed;
         }
@@ -511,7 +511,7 @@ function updateShip() {
 
     world.ship.facing = lerp(world.ship.facing, world.ship.desiredFacing, 0.1);
 
-    if (world.state.type === "landed") {
+    if (world.ship.state.type === "landed") {
         return;
     }
 
@@ -650,7 +650,7 @@ function calcGroundClearance(ship) {
 }
 
 function checkIsOkForLanding(ship) {
-    if (world.state.type !== "flying") {
+    if (ship.state.type !== "flying") {
         return {
             result: false,
             reason: "not flying",
@@ -720,7 +720,7 @@ function isShipLevel(ship) {
 }
 
 function setLandedShip(ship) {
-    world.state = {
+    ship.state = {
         type: "landed",
     };
     ship.vel = createVector(0, 0);
@@ -742,7 +742,7 @@ function respawnShip() {
     world.ship.vel = createVector(0, 0);
     setShipUprightImmediately(world.ship);
     world.ship.fuel = 1;
-    world.state = {
+    world.ship.state = {
         type: "flying",
     };
 }
@@ -1026,7 +1026,7 @@ function cheatSetShipForEasyLanding(ship) {
     setShipUprightImmediately(ship);
     ship.vel = createVector(0, 0.5);
     postMessage("cheat! easy landing prepared");
-    world.state = {
+    world.ship.state = {
         type: "flying",
     };
 }
