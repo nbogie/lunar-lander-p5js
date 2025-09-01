@@ -66,7 +66,7 @@ let config = {
 function setupMatterJS() {
     engine = Engine.create();
 
-    renderFn = Render.create({
+    const renderFn = Render.create({
         element: document.body,
         engine: engine,
         options: {
