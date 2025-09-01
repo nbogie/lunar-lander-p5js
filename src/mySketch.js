@@ -879,6 +879,9 @@ function keyPressed() {
     if (key === "R" || key === "r") {
         restart();
     }
+    if (key === "p") {
+        togglePause();
+    }
     if (key === "l") {
         cheatSetShipForEasyLanding(world.ship);
     }
@@ -980,4 +983,12 @@ function formatMillisecondsToMMSS(milliseconds) {
     const seconds = totalSeconds % 60;
     const pad = (val) => val.toString().padStart(2, "0");
     return [minutes, seconds].map(pad).join(":");
+}
+
+function togglePause() {
+    if (isLooping()) {
+        noLoop();
+    } else {
+        loop();
+    }
 }
