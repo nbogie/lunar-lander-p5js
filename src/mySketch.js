@@ -420,17 +420,17 @@ function drawShip(ship) {
         rect(-8, 0, 5, 5);
     }
 
-    const mainBodyHeight = ship.height * 0.8;
+    const mainBodyHeight = round(ship.height * 0.8);
 
     push();
-    translate(ship.pos);
+    translate(round(ship.pos.x), round(ship.pos.y));
     drawShipOverlay(ship);
     rotate(ship.facing);
 
     stroke(255);
     fill(ship.colour);
     rectMode(CENTER);
-    rect(0, 0, mainBodyHeight * 0.8, mainBodyHeight);
+    rect(0, 0, round(mainBodyHeight * 0.8), mainBodyHeight);
 
     //debug ship height
     // noFill();
