@@ -101,9 +101,7 @@ function drawWind() {
 }
 
 function updateExplosions() {
-    world.explosions = world.explosions.filter(
-        (exp) => frameCount - exp.startFrame < 30
-    );
+    world.explosions = world.explosions.filter((exp) => frameCount - exp.startFrame < 30);
 }
 
 function drawStarfield() {
@@ -180,14 +178,7 @@ function drawExplosion(explosion) {
     stroke(random(0, 50), 100, 100, 50);
 
     for (let i = 0; i < numPts; i++) {
-        const radius = map(
-            abs(frameCount - explosion.startFrame - 15),
-            0,
-            30,
-            40,
-            10,
-            true
-        );
+        const radius = map(abs(frameCount - explosion.startFrame - 15), 0, 30, 40, 10, true);
         const p = p5.Vector.add(
             explosion.pos,
             p5.Vector.random2D().mult(randomGaussian(radius, radius * 0.3))
@@ -577,11 +568,7 @@ function addParticleEffectsFromThrusters(thrustVec) {
  * @param {p5.Vector} relativePosition The point's local offset from the centre of the parent body
  * @returns {p5.Vector} A new vector representing the point's world-space coordinates after following the body's rotation.
  */
-function getRotatedPositionOfOffsetPoint(
-    parentPos,
-    parentRotation,
-    relativePosition
-) {
+function getRotatedPositionOfOffsetPoint(parentPos, parentRotation, relativePosition) {
     let rotatedOffset = relativePosition.copy();
     rotatedOffset.rotate(parentRotation);
     return p5.Vector.add(parentPos, rotatedOffset);
@@ -592,11 +579,7 @@ function createWindAt(pos) {
         return 0;
     }
     const MAX_WIND_SPEED = 0.01;
-    const noiseAtPos = noise(
-        5000 + pos.x / 1000,
-        3000 + pos.y / 100,
-        frameCount / 500
-    );
+    const noiseAtPos = noise(5000 + pos.x / 1000, 3000 + pos.y / 100, frameCount / 500);
     const centredNoise = map(noiseAtPos, 0.1, 0.9, -1, 1, true);
     if (abs(centredNoise) < 0.2) {
         return 0;
@@ -614,9 +597,7 @@ function postMessage(str, durationMs = 5000) {
 }
 
 function updateMessages() {
-    world.messages = world.messages.filter(
-        (m) => millis() < m.postTime + m.durationMs
-    );
+    world.messages = world.messages.filter((m) => millis() < m.postTime + m.durationMs);
 }
 
 function drawMessages() {
@@ -767,15 +748,7 @@ function createWorld() {
 
 function createPalette() {
     // Kjetil Golid's "Tundra3" https://chromotome-quicker.netlify.app/
-    const arr = [
-        "#87c3ca",
-        "#7b7377",
-        "#b2475d",
-        "#7d3e3e",
-        "#eb7f64",
-        "#d9c67a",
-        "#f3f2f2",
-    ];
+    const arr = ["#87c3ca", "#7b7377", "#b2475d", "#7d3e3e", "#eb7f64", "#d9c67a", "#f3f2f2"];
     return {
         arr, //the loose colours
         skyBackground: 20,
@@ -835,13 +808,7 @@ function createTerrain(palette) {
     const pts = [];
     let prevY = null;
     for (let x = -config.xStep; x < width + 50; x += config.xStep) {
-        const noiseY = map(
-            noise(2000 + x / 300),
-            0.15,
-            0.85,
-            height * 0.9,
-            height * 0.3
-        );
+        const noiseY = map(noise(2000 + x / 300), 0.15, 0.85, height * 0.9, height * 0.3);
         let y = noiseY;
         const nearPad = isNearAnyLandingPad(x, landingPads);
         if (nearPad) {
@@ -865,10 +832,7 @@ function isNearAnyLandingPad(x, landingPads) {
 }
 
 function landingPadAtXOrNull(x) {
-    return (
-        world.terrain.landingPads.find((pad) => isNearLandingPad(x, pad)) ??
-        null
-    );
+    return world.terrain.landingPads.find((pad) => isNearLandingPad(x, pad)) ?? null;
 }
 
 function isNearLandingPad(x, pad) {
@@ -1013,14 +977,7 @@ function applyAnyScreenShake() {
     const magSpeed = angleSpeed * 2;
     const maxDisplacement = 6;
 
-    const angle = map(
-        noise(frameCount * angleSpeed),
-        0.1,
-        0.9,
-        0,
-        TWO_PI * 2,
-        true
-    );
+    const angle = map(noise(frameCount * angleSpeed), 0.1, 0.9, 0, TWO_PI * 2, true);
     const mag =
         map(noise(2000 + frameCount * magSpeed), 0.1, 0.9, -1, 1, true) *
         maxDisplacement *
