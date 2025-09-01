@@ -718,7 +718,7 @@ function snapTo(val, increment) {
 }
 
 function createLandingPads(palette) {
-    const createOnePad = ({ frac, name }) => ({
+    const createOneLandingPad = ({ frac, name }) => ({
         leftX: snapTo(frac * width, config.xStep),
         width: config.padWidth,
         colour: random(palette.arr),
@@ -727,9 +727,11 @@ function createLandingPads(palette) {
         name,
     });
 
-    const baseNames = shuffle("Bravo Charlie Dog Lima".split(" "));
+    const baseNames = shuffle(
+        "Able Baker Charlie Dog Easy Fox Lima Oscar Whiskey Sierra".split(" ")
+    );
     return zipWith(baseNames, [0.2, 0.8], (name, frac) =>
-        createOnePad({
+        createOneLandingPad({
             name,
             frac,
         })
