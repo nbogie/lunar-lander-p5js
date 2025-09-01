@@ -57,12 +57,15 @@ let config = {
     debugMessagesEnabled: true,
     rainbowWindEnabled: false,
     drawSunAsLines: false,
-    matterDebugRendererEnabled: true, //needs restart
+    matter: {
+        enabled: false,
+        debugRendererEnabled: true,
+    }, //needs restart
 };
 
 function setupMatterJS() {
     engine = Engine.create();
-    config.matterDebugRendererEnabled && setupMatterJSDebugRenderer();
+    config.matter.debugRendererEnabled && setupMatterJSDebugRenderer();
     var runner = Runner.create();
     Runner.run(runner, engine);
 }
@@ -80,10 +83,13 @@ function setupMatterJSDebugRenderer() {
 }
 
 function setup() {
-    const mainCanvasHeight = config.matterDebugRendererEnabled ? windowHeight / 2 : windowHeight;
+    const mainCanvasHeight =
+        config.matter.enabled && config.matter.debugRendererEnabled
+            ? windowHeight / 2
+            : windowHeight;
     createCanvas(windowWidth, mainCanvasHeight);
 
-    setupMatterJS();
+    config.matter.enabled && setupMatterJS();
     frameRate(60);
     textFont("Courier New");
     postInstructionalMessages();
@@ -862,8 +868,10 @@ function createWorld() {
         bodies: [],
     };
 
-    const bodies = createInitialPhysicsBodies(createdWorld);
-    createdWorld.bodies = bodies;
+    if (config.matter.enabled) {
+        const bodies = createInitialPhysicsBodies(createdWorld);
+        createdWorld.bodies = bodies;
+    }
     return createdWorld;
 }
 
