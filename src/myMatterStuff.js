@@ -1,3 +1,6 @@
+//Experimental matter.js support (e.g. for registering the terrain as a set of matter.js bodies)
+//if matter.js is enabled in config, the matter.js poly-decomp libraries will be needed
+
 /** matter.js engine */
 let engine;
 

@@ -48,7 +48,7 @@ let config = {
     rainbowWindEnabled: false,
     drawSunAsLines: false,
     matter: {
-        enabled: false, //sketch restart required
+        enabled: false, //sketch restart and matter.js and poly-decomp libraries will be required if enabled
         debugRendererEnabled: false, //sketch restart required
     },
 };
