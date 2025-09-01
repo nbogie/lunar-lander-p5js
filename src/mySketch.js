@@ -613,7 +613,7 @@ function updateShip() {
                     type: "flying",
                 };
                 const pad = landingPadAtXOrNull(world.ship.pos.x);
-                postMessage("Lift off from " + pad.name + " base ");
+                postMessage("Lift off from " + pad.name + " base");
                 tookOffThisFrame = true;
             }
         }
@@ -811,7 +811,7 @@ function setLandedShip(ship) {
     //(no immediate refuel)
 
     const pad = landingPadAtXOrNull(ship.pos.x);
-    postMessage("Landed at " + pad.name + " base ");
+    postMessage("Landed at " + pad.name + " base");
 }
 
 function setShipUprightImmediately(ship) {
