@@ -52,6 +52,8 @@ let config = {
     refuelPerTick: 0.0035,
     windEnabled: true,
     numWindParticles: 500,
+    screenShakeEnabled: true,
+    debugMessagesEnabled: true,
 };
 
 function setupMatterJS() {
@@ -182,6 +184,8 @@ function drawBall(b) {
 }
 function draw() {
     background(world.palette.skyBackground);
+    push();
+    config.screenShakeEnabled && applyAnyScreenShake();
     updateShip();
     updateParticles();
     if (config.windEnabled) {
@@ -196,9 +200,11 @@ function draw() {
     drawShip(world.ship);
     world.explosions.forEach(drawExplosion);
     drawMessages();
-    drawDebugText();
+    config.debugMessagesEnabled && drawDebugText();
+    pop(); //end effect of screenshake
 
     updateExplosions();
+    updateAnyScreenShake();
     updateMessages();
 }
 
@@ -563,7 +569,7 @@ function updateShip() {
             world.ship.fuel = constrain(world.ship.fuel + amtTransferred, 0, 1);
             pad.fuel = constrain(pad.fuel - amtTransferred, 0, pad.maxFuel);
             if (world.ship.fuel >= 1) {
-                postMessage("Refuelling complete");
+                postMessage("Refuelling complete.");
             }
         }
     }
@@ -636,6 +642,7 @@ function updateShip() {
         //todo: spawn an explosion at crash site
         spawnExplosion(world.ship.pos.copy());
         respawnShip();
+        world.screenShakeAmt = 1;
         postMessage("cause of crash: " + landingCheck.reason + ".");
     }
 }
@@ -788,6 +795,7 @@ function createWorld() {
         stars: createStarfield(),
         messages: [],
         palette,
+        screenShakeAmt: 0,
         bodies: [],
     };
 
@@ -952,17 +960,56 @@ function keyPressed() {
     }
 
     if (key === "w") {
-        config.windEnabled = !config.windEnabled;
+        toggleConfigBoolean("windEnabled", "wind");
+    }
+
+    if (key === "d") {
+        toggleConfigBoolean("debugMessagesEnabled", "debug messages");
+    }
+
+    if (key === "s") {
+        toggleConfigBoolean("screenShakeEnabled", "screen-shake");
     }
 }
 
+function toggleConfigBoolean(key, label) {
+    config[key] = !config[key];
+    const desc = config[key] ? "enabled" : "disabled";
+    postMessage(label + " " + desc + ".");
+}
+
 function postInstructionalMessages() {
-    postDelayedMessage("Arrows to rotate.", 2000, 25000);
-    postDelayedMessage("up arrow to thrust.", 4000, 25000);
-    postDelayedMessage("'R' to restart / regenerate.", 6000, 25000);
-    postDelayedMessage("'w' to toggle wind.", 5000, 25000);
+    postDelayedMessage("Arrows to rotate.", 2000, 18000);
+    postDelayedMessage("up arrow to thrust.", 4000, 18000);
+    postDelayedMessage("'R' to restart / regenerate.", 6000, 18000);
+    postDelayedMessage("'w' to toggle wind.", 8000, 18000);
+    postDelayedMessage("'d' to toggle debug text.", 10000, 18000);
 }
 
 function postDelayedMessage(str, delay, durationMs) {
     setTimeout(() => postMessage(str, durationMs), delay);
+}
+
+function applyAnyScreenShake() {
+    const angleSpeed = 0.05;
+    const magSpeed = angleSpeed * 2;
+    const maxDisplacement = 6;
+
+    const angle = map(
+        noise(frameCount * angleSpeed),
+        0.1,
+        0.9,
+        0,
+        TWO_PI * 2,
+        true
+    );
+    const mag =
+        map(noise(2000 + frameCount * magSpeed), 0.1, 0.9, -1, 1, true) *
+        maxDisplacement *
+        world.screenShakeAmt;
+    const offset = p5.Vector.fromAngle(angle, mag);
+    translate(offset.x, offset.y);
+}
+function updateAnyScreenShake() {
+    world.screenShakeAmt = constrain(world.screenShakeAmt - 0.01, 0, 1);
 }
