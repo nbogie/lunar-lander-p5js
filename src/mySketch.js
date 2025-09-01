@@ -40,6 +40,7 @@ let config = {
     numWindParticles: 500,
     screenShakeEnabled: true,
     debugMessagesEnabled: true,
+    rainbowWindEnabled: false,
 };
 
 function setup() {
@@ -66,12 +67,12 @@ function draw() {
     config.screenShakeEnabled && applyAnyScreenShake();
     updateShip();
     updateParticles();
+    drawStarfield();
+    drawDistantPlanet();
     if (config.windEnabled) {
         world.windParticles.forEach(updateWindParticle);
         drawWind();
     }
-    drawStarfield();
-    drawDistantPlanet();
     drawTerrain();
     drawParticles();
     drawShip(world.ship);
@@ -262,18 +263,32 @@ function createWindParticles() {
 
 function createWindParticle() {
     const pos = createVector(random(width), random(height));
+
     return {
         pos,
         vel: createWindAt(pos),
         size: random(0.5, 1),
-        colour: random(["rgba(195,228,242,0.5)", "rgba(211,211,211,0.5)"]),
+        colour: generateSubtleWindColour(),
+        rainbowColour: generateRainbowWindColour(),
     };
+}
+
+function generateRainbowWindColour() {
+    push();
+    colorMode(HSB);
+    const colour = color(random(360), 80, 100);
+    pop();
+    return colour;
+}
+
+function generateSubtleWindColour() {
+    return random(["rgba(195,228,242)", "rgba(211,211,211)"]);
 }
 
 function drawWindParticle(p) {
     const strength = createWindAt(p.pos);
     push();
-    stroke(p.colour);
+    stroke(config.rainbowWindEnabled ? p.rainbowColour : p.colour);
     strokeWeight(p.size);
     translate(p.pos.x, p.pos.y);
     line(0, 0, strength * 3000, 0);
@@ -834,12 +849,19 @@ function keyPressed() {
         toggleConfigBoolean("windEnabled", "wind");
     }
 
+    if (key === "h") {
+        postInstructionalMessages();
+    }
+
     if (key === "d") {
         toggleConfigBoolean("debugMessagesEnabled", "debug messages");
     }
 
     if (key === "s") {
         toggleConfigBoolean("screenShakeEnabled", "screen-shake");
+    }
+    if (key === "c") {
+        toggleConfigBoolean("rainbowWindEnabled", "rainbow-wind");
     }
 }
 
@@ -850,11 +872,22 @@ function toggleConfigBoolean(key, label) {
 }
 
 function postInstructionalMessages() {
-    postDelayedMessage("Arrows to rotate.", 2000, 18000);
-    postDelayedMessage("up arrow to thrust.", 4000, 18000);
-    postDelayedMessage("'R' to restart / regenerate.", 6000, 18000);
-    postDelayedMessage("'w' to toggle wind.", 8000, 18000);
-    postDelayedMessage("'d' to toggle debug text.", 10000, 18000);
+    const msgs = [
+        "Arrows to rotate.",
+        "up arrow to thrust.",
+        "'R' to restart / regenerate.",
+        "'w' to toggle wind.",
+        "'c' to toggle rainbow wind.",
+        "'d' to toggle debug text.",
+        "'h' for help.",
+    ];
+    let delayMs = 0;
+    const spacingMs = 1500;
+    const duration = 15000;
+    for (let msg of msgs) {
+        postDelayedMessage(msg, delayMs, duration);
+        delayMs += spacingMs;
+    }
 }
 
 function postDelayedMessage(str, delay, durationMs) {
