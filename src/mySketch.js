@@ -1,8 +1,10 @@
 /*
 	Lunar Lander #WCCChallenge "Pump"
 	https://openprocessing.org/sketch/2711492
-	
-	A quick attempt at implementing a "lunar-lander"/"thrust" style game.	
+    
+    See also WIP matter.js branch at https://github.com/nbogie/lunar-lander-p5js
+
+	This is a quick attempt at implementing a "lunar-lander"/"thrust" style game.
 	So far, the pump theme isn't very strong in this one, but I though i'd submit for fun as I did write it for the challenge. 
 	
 	Currently, there's: 
