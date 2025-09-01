@@ -841,9 +841,7 @@ function createShip(palette) {
         colour: palette.skyBackground, //arr[5]
     };
 }
-// 110 should snap to 120 for 30 and 40
-// 110/30 = 3.66 round to 4.  4 * 30 = 120
-// 110/40 = 2.75 round to 3. 3 * 40 = 120
+
 function snapTo(val, increment) {
     return round(val / increment) * increment;
 }
