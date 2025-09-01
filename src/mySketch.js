@@ -32,17 +32,13 @@
 // * make wind visualisation more efficient (e.g. periodically spawn replacement short-lived wind particles across a loose grid to ensure coverage, rather than relying on coverage through large numbers)
 
 const Engine = Matter.Engine,
-    Render = Matter.Render,
     Runner = Matter.Runner,
     Composites = Matter.Composites,
     Composite = Matter.Composite,
     Common = Matter.Common,
-    MouseConstraint = Matter.MouseConstraint,
-    Mouse = Matter.Mouse,
-    Query = Matter.Query,
     Bodies = Matter.Bodies;
 
-// create engine
+/** matter.js engine */
 let engine;
 
 let world;
@@ -61,12 +57,18 @@ let config = {
     debugMessagesEnabled: true,
     rainbowWindEnabled: false,
     drawSunAsLines: false,
+    matterDebugRendererEnabled: true, //needs restart
 };
 
 function setupMatterJS() {
     engine = Engine.create();
+    config.matterDebugRendererEnabled && setupMatterJSDebugRenderer();
+    var runner = Runner.create();
+    Runner.run(runner, engine);
+}
 
-    const renderFn = Render.create({
+function setupMatterJSDebugRenderer() {
+    const renderFn = Matter.Render.create({
         element: document.body,
         engine: engine,
         options: {
@@ -74,14 +76,13 @@ function setupMatterJS() {
             height,
         },
     });
-
-    Render.run(renderFn);
-    var runner = Runner.create();
-    Runner.run(runner, engine);
+    Matter.Render.run(renderFn);
 }
 
 function setup() {
-    createCanvas(windowWidth, windowHeight / 2);
+    const mainCanvasHeight = config.matterDebugRendererEnabled ? windowHeight / 2 : windowHeight;
+    createCanvas(windowWidth, mainCanvasHeight);
+
     setupMatterJS();
     frameRate(60);
     textFont("Courier New");
@@ -89,17 +90,15 @@ function setup() {
     restart();
 }
 
-function createPhysicsBodies(world) {
+function createInitialPhysicsBodies(world) {
     const bodyOptions = {
         frictionAir: 0,
         friction: 0.0001,
         restitution: 0.6,
     };
-    console.log({ w: engine.world });
     const starBodies = world.stars.map((star) => Bodies.circle(star.pos.x, 0, 10, bodyOptions));
     const terrainBody = createBodyForTerrain(world);
     const allBodies = [...starBodies, terrainBody];
-    console.log({ allBodies });
     Composite.add(engine.world, allBodies);
     return allBodies;
 }
@@ -107,7 +106,6 @@ function createPhysicsBodies(world) {
 function createBodyForTerrain(world) {
     //if poly-decomp is loaded by the browser (with a script tag), a global variable "decomp" will be available
     Common.setDecomp(decomp);
-    console.log({ decomp: Common.decomp });
     //or for other packaging methods
     // Common.setDecomp(require("poly-decomp"));
     const verticesFromTerrain = world.terrain.points.map(({ x, y }) => ({
@@ -864,7 +862,7 @@ function createWorld() {
         bodies: [],
     };
 
-    const bodies = createPhysicsBodies(createdWorld);
+    const bodies = createInitialPhysicsBodies(createdWorld);
     createdWorld.bodies = bodies;
     return createdWorld;
 }
