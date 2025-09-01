@@ -429,7 +429,6 @@ function drawShip(ship) {
 
     stroke(255);
     fill(ship.colour);
-    noFill();
     rectMode(CENTER);
     rect(0, 0, mainBodyHeight * 0.8, mainBodyHeight);
 
