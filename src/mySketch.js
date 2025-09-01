@@ -1,9 +1,9 @@
-"use strict";
+//"use strict";
 /*
 	Lunar Lander #WCCChallenge "Pump"
 	https://openprocessing.org/sketch/2711492
     
-    See also WIP matter.js branch at https://github.com/nbogie/lunar-lander-p5js
+    Also on github at https://github.com/nbogie/lunar-lander-p5js
 
 	This is a quick attempt at implementing a "lunar-lander"/"thrust" style game.
 	So far, the pump theme isn't very strong in this one, but I though i'd submit for fun as I did write it for the challenge. 
@@ -25,11 +25,11 @@
 // *   paint wind areas by gas colour
 // * incorporate deltaTime to support any frameRate
 // * add pumping of oxygen or other gases or liquids?
-// * switch to using a physics engine (e.g. matter.js Bodies.fromVertices)
 // * use constraints to pick up and move cargo between locations
 // * have some cavernous levels with a ceiling
-// * incorporate ideas from infinite golf game
+// * incorporate ideas from "desert golf" game
 // * make wind visualisation more efficient (e.g. periodically spawn replacement short-lived wind particles across a loose grid to ensure coverage, rather than relying on coverage through large numbers)
+// * complete a switch-over to matter.js physics engine
 
 let world;
 
@@ -241,10 +241,6 @@ function drawDebugText() {
 
     outputs.push({
         t: composeVerticalSpeedMessage(),
-    });
-
-    outputs.push({
-        t: "seed " + config.seed,
     });
 
     translate(200, 50);
