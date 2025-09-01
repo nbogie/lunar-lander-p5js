@@ -43,6 +43,7 @@ function createInitialPhysicsBodies(world) {
     return allBodies;
 }
 
+//See https://github.com/liabru/matter-js/blob/master/examples/terrain.js and https://brm.io/matter-js/demo/#terrain
 function createPhysicsBodyForTerrain(world) {
     //if poly-decomp is loaded by the browser (with a script tag), a global variable "decomp" will be available
     Common.setDecomp(decomp);
