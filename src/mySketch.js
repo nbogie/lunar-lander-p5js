@@ -24,6 +24,13 @@
 */
 
 // TODO:
+// * move ILS msg under nearest base.  remove it if not near a base
+// * change the landing check returned object to be a list of checks so that
+//   * an ILS can display ALL of them
+//   * landings / crashes can be graded / reported in detail
+// * award pts for better landings
+// * award pts for low-altitude, high-speed flying
+// * award pts for loop-the-loop (track cumulative rotation)
 // * allow fuel-scooping "cosmic winds" (perhaps this is ship fuel or otherwise needed by bases)
 // *   paint wind areas by gas colour
 // * incorporate deltaTime to support any frameRate
@@ -124,8 +131,11 @@ function draw() {
 
     drawThrustParticles();
     drawShip(world.ship);
+    drawLastLandingCheckWarning(world.ship);
+
     world.explosions.forEach(drawExplosion);
     drawMessages();
+
     config.debugMessagesEnabled && drawDebugText();
     pop(); //end effect of screenshake
 
@@ -485,6 +495,7 @@ function drawFuelBar(ship) {
 }
 
 function updateShip(ship) {
+    ship.lastLandingCheck = undefined;
     if (ship.state.type === "landed") {
         if (ship.fuel < 1) {
             const pad = landingPadAtXOrNull(ship.pos.x);
@@ -538,18 +549,12 @@ function updateShip(ship) {
 
     if (!tookOffThisFrame) {
         const landingCheck = checkIsOkForLanding(ship);
+
+        ship.lastLandingCheck = landingCheck; // for later rendering (e.g. in ILS)
+
         if (landingCheck.result) {
             setLandedShip(ship);
             return;
-        }
-
-        if (landingCheck.type === "warning") {
-            push();
-            fill(world.palette.all[5]);
-            noStroke();
-            textSize(18);
-            text(landingCheck.reason, 200, 200);
-            pop();
         }
 
         if (isUnderTerrain(ship)) {
@@ -560,6 +565,27 @@ function updateShip(ship) {
             postMessage("cause of crash: " + landingCheck.reason);
         }
     }
+}
+
+function drawLastLandingCheckWarning(ship) {
+    const lastLandingCheck = ship.lastLandingCheck;
+    if (!lastLandingCheck || lastLandingCheck.type !== "warning") {
+        return;
+    }
+    const pad = nearestLandingPad(ship.pos.x);
+
+    if (distanceToLandingPad(pad, ship.pos.x) > pad.width) {
+        return;
+    }
+
+    push();
+    fill(world.palette.all[5]);
+    noStroke();
+    textSize(18);
+    textAlign(CENTER);
+    translate(pad.centreX, getHeightAt(pad.centreX) + 60);
+    text(lastLandingCheck.reason, 0, 0);
+    pop();
 }
 
 function fireThrusters() {
@@ -821,7 +847,8 @@ function createShip(palette) {
         desiredFacing: -PI / 2,
         fuel: 1,
         thrustColour: palette.all[2],
-        colour: palette.skyBackground, //arr[5]
+        colour: palette.skyBackground, //arr[5],
+        lastLandingCheck: undefined,
     };
 }
 
@@ -830,14 +857,21 @@ function snapTo(val, increment) {
 }
 
 function createLandingPads(palette) {
-    const createOneLandingPad = ({ frac, name, colour }) => ({
-        leftX: snapTo(frac * width, config.xStep),
-        width: config.padWidth,
-        colour,
-        fuel: 4,
-        maxFuel: 4,
-        name,
-    });
+    function createOneLandingPad({ frac, name, colour }) {
+        const leftX = snapTo(frac * width, config.xStep);
+        const padWidth = config.padWidth;
+        const centreX = leftX + padWidth / 2;
+
+        return {
+            leftX,
+            centreX,
+            width: padWidth,
+            colour,
+            fuel: 4,
+            maxFuel: 4,
+            name,
+        };
+    }
 
     const baseNames = shuffle(
         "Able Baker Charlie Dog Echo Fox Inigo Lima Oscar Patel Reynolds Tango Shiffman Whiskey".split(
@@ -901,8 +935,16 @@ function landingPadAtXOrNull(x) {
     return world.terrain.landingPads.find((pad) => isNearLandingPad(x, pad)) ?? null;
 }
 
+function nearestLandingPad(x) {
+    return minBy(world.terrain.landingPads, (p) => distanceToLandingPad(p, x));
+}
+
+function distanceToLandingPad(pad, x) {
+    return abs(pad.centreX - x);
+}
+
 function isNearLandingPad(x, pad) {
-    return x >= pad.leftX && abs(x - pad.leftX) <= pad.width;
+    return x >= pad.leftX && x <= pad.leftX + pad.width;
 }
 
 function spawnPosition() {
@@ -1212,4 +1254,20 @@ function focusCanvasOnce() {
     if (frameCount === 30) {
         p5Canvas.elt.focus();
     }
+}
+
+function minBy(arr, fn) {
+    if (!arr || arr.length === 0) {
+        return undefined;
+    }
+    let minVal = Infinity;
+    let minElement = undefined;
+    for (const candidateElement of arr) {
+        const val = fn(candidateElement);
+        if (val < minVal) {
+            minVal = val;
+            minElement = candidateElement;
+        }
+    }
+    return minElement;
 }
