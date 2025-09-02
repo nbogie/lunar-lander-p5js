@@ -84,10 +84,23 @@ function setup() {
     config.matter.enabled && setupMatterJS();
     frameRate(60);
     textFont("Courier New");
-    postInstructionalMessages();
+
+    postFlavourMessages();
+    // postInstructionalMessages();
+
     restart();
 }
 
+function postFlavourMessages() {
+    const msgs = [
+        "Guidance and navigation, all green",
+        "Propellant quantity reads nominal",
+        "Telemetry data confirms a stable attitude",
+        "Switching to manual",
+        "('h' for help)",
+    ];
+    postMessagesAtIntervals(msgs);
+}
 function restart() {
     //e.g. config.seed = 1756680251196;
     config.seed = round(new Date());
@@ -1193,6 +1206,10 @@ function postInstructionalMessages({ all } = { all: false }) {
     ];
     const msgs = [...coreMessages, ...(all ? otherMessages : [])];
 
+    postMessagesAtIntervals(msgs);
+}
+
+function postMessagesAtIntervals(msgs) {
     const spacingMs = 1000;
     const duration = 10000;
     let delayMs = 0;
@@ -1308,13 +1325,9 @@ const thematicCommsMessages = {
         "Aborting descent, repeat, aborting descent.",
         "Mayday, Mayday. We've lost an engine.",
         "Impact imminent.",
-    ],
-    funAndFlavor: [
-        "Well, that was a heck of a ride.",
         "Looks like we're out of gas.",
         "I've got a bad feeling about this.",
         "Houston, we have a problem.",
-        "I'll be seeing you.",
     ],
     routineChecks: [
         "Guidance and navigation, all green.",
@@ -1341,5 +1354,7 @@ const thematicCommsMessages = {
         "Looks like a good spot down there.",
         "Alright, let's bring her home.",
         "It's quieter down here than I expected.",
+        "Well, that was a heck of a ride.",
+        "I'll be seeing you.",
     ],
 };
