@@ -588,7 +588,7 @@ function addParticleEffectsFromThrusters(thrustVec) {
                 thrustVec
                     .copy()
                     .rotate(randomGaussian(PI, PI / 20))
-                    .setMag(1.5),
+                    .setMag(random(1.45, 1.55)),
                 world.ship.thrustColour
             )
         );
