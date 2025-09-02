@@ -117,7 +117,7 @@ function draw() {
         world.bodies.forEach(drawBall);
     }
 
-    drawParticles();
+    drawThrustParticles();
     drawShip(world.ship);
     world.explosions.forEach(drawExplosion);
     drawMessages();
@@ -178,14 +178,14 @@ function updateParticle(p) {
     }
 }
 
-function createThrustParticle(pos, vel) {
+function createThrustParticle(pos, vel, colour) {
     return {
         pos: pos.copy(),
         vel: vel.copy(),
         isDead: false,
         startFrame: frameCount,
         maxAge: random(60, 120),
-        colour: random(world.palette.all),
+        colour,
         size: random([1, 2]),
     };
 }
@@ -275,16 +275,19 @@ function composeVerticalSpeedMessage() {
     return "v speed " + emoji + " " + world.ship.vel.y.toFixed(1);
 }
 
-function drawParticles() {
-    world.particles.forEach(drawParticle);
+function drawThrustParticles() {
+    world.particles.forEach(drawThrustParticle);
 }
 
-function drawParticle(p) {
+function drawThrustParticle(p) {
     push();
-    fill(p.colour);
-    noStroke();
-    rectMode(CENTER);
-    square(p.pos.x, p.pos.y, p.size);
+    stroke(p.colour); //all[2] is vibrant
+    translate(p.pos.x, p.pos.y);
+    //perpendicular to direction of movement
+    rotate(p.vel.heading() + PI / 2);
+    //line gets bigger with particle age, up to a limit
+    const ageScaling = map(frameCount - p.startFrame, 0, 30, 1, 4, true);
+    line(-ageScaling * p.size, 0, ageScaling * p.size, 0);
     pop();
 }
 
@@ -585,7 +588,8 @@ function addParticleEffectsFromThrusters(thrustVec) {
                 thrustVec
                     .copy()
                     .rotate(randomGaussian(PI, PI / 20))
-                    .setMag(1.5)
+                    .setMag(1.5),
+                world.ship.thrustColour
             )
         );
     });
@@ -741,7 +745,10 @@ function setLandedShip(ship) {
     //(no immediate refuel)
 
     const pad = landingPadAtXOrNull(ship.pos.x);
-    postMessage("Landed at " + pad.name + " base");
+    if (pad) {
+        ship.thrustColour = pad.colour;
+        postMessage("Landed at " + pad.name + " base");
+    }
 }
 
 function setShipUprightImmediately(ship) {
@@ -806,6 +813,7 @@ function createShip(palette) {
         facing: -PI / 2,
         desiredFacing: -PI / 2,
         fuel: 1,
+        thrustColour: palette.all[2],
         colour: palette.skyBackground, //arr[5]
     };
 }
