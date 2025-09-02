@@ -241,11 +241,11 @@ function drawDebugText() {
         t: "state: " + str,
     });
 
-    let colour = world.ship.fuel < 0.15 && frameCount % 30 < 15 ? 50 : 255;
+    let colourForFuelMsg = world.ship.fuel < 0.15 && frameCount % 30 < 15 ? 50 : 255;
 
     outputs.push({
         t: "fuel " + (world.ship.fuel * 100).toFixed(1) + "%",
-        colour,
+        colourForFuelMsg,
     });
 
     outputs.push({
@@ -707,7 +707,12 @@ function checkIsOkForLanding(ship) {
 }
 
 function getTiltAngle(ship) {
-    return normalizeRotationAsTilt(ship.facing + PI / 2);
+    return normalizeRotationAsTiltAlternativeMethod(ship.facing + PI / 2);
+}
+
+// see normalizeRotationAsTilt.  Achieves the same result, but with one more division.
+function normalizeRotationAsTiltAlternativeMethod(raw) {
+    return ((((raw - PI) % TWO_PI) + TWO_PI) % TWO_PI) - PI;
 }
 
 //converts a rotation in range -inf to +inf into range -179.999 to +180
