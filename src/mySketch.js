@@ -8,10 +8,13 @@
 	This is a quick attempt at implementing a "lunar-lander"/"thrust" style game.
 	So far, the pump theme isn't very strong in this one, but I though i'd submit for fun as I did write it for the challenge. 
 	
+    
 	Currently, there's: 
-	* fuel pumped from the tank to the ship,
-	* association with the winds that blow across the moon
-			(I can't decide how much atmosphere is, here!)
+	* fuel pumped from the tank to the ship,    
+	* pump association with the winds that blow across the moon,
+    (I can't decide how much atmosphere is, here!)
+    
+    Credits: Palette is "Tundra3" from Kjetil Golid's chromotome collection https://chromotome-quicker.netlify.app/ and https://github.com/kgolid
 	
 	See all challenge submissions: 
 	https://openprocessing.org/curation/78544
