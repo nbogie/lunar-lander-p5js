@@ -4,7 +4,12 @@
 // This enables intellisense - auto-completion, inline documentation, and type checking.
 //
 // iirc, I originally copied this from https://github.com/Gaweph/p5-typescript-starter
+
+//All that's needed for global-mode, if we're not referring to the p5 types in JSDocs
 import * as p5Global from "p5/global";
+
+// These are needed to make the types available for use in jsdoc comments.
+// And for use in instanced mode
 import module from "p5";
 export = module;
 export as namespace p5;
