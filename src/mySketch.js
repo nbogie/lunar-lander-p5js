@@ -49,6 +49,7 @@
     * move ILS msg under nearest base.  remove it if not near a base
 */
 
+/** @type {World} */
 let world;
 
 let config = {
@@ -839,13 +840,38 @@ function respawnShip() {
     };
 }
 
+/**
+ * @typedef {Object} LandedFlyingState
+ * @property {"flying"|"landed"} type
+ */
+
+/**
+ * @typedef {Object} World
+ 
+ * @property {Ship} ship - the player's ship
+ * @property {Terrain} terrain
+ * @property {any[]} explosions
+ * @property {any[]} explosions
+ * @property {any[]} particles
+ * @property {any[]} windParticles
+ * @property {any[]} stars
+ * @property {any[]} messages
+ * @property {Palette} palette
+ * @property {number} screenShakeAmt - 0 means no screenshake.  diminishes over time.
+ * @property {number} moonShadowFraction
+ * @property {any[]} bodies - bodies simulated by matter.js (currently  not used in gameplay)
+ *
+ **/
+
+/**
+ *
+ * @returns {World}
+ */
 function createWorld() {
     const palette = createPalette();
 
+    /** @type {World} */
     const createdWorld = {
-        state: {
-            type: "flying", //landed | flying
-        },
         ship: createShip(palette),
         terrain: createTerrain(palette),
         explosions: [],
@@ -867,19 +893,50 @@ function createWorld() {
     return createdWorld;
 }
 
+/**
+ * @typedef {Object} Palette
+ * @property {p5.Color[]} all - all loose colours
+ * @property {p5.Color[]} bases - brighter colours for use as bases
+ * @property {p5.Color} skyBackground
+ * @property {p5.Color} landBackground
+ */
+/**
+ *
+ * @returns {Palette}
+ */
 function createPalette() {
     // Kjetil Golid's "Tundra3" https://chromotome-quicker.netlify.app/
-    const all = ["#87c3ca", "#7b7377", "#b2475d", "#7d3e3e", "#eb7f64", "#d9c67a", "#f3f2f2"];
+    const all = ["#87c3ca", "#7b7377", "#b2475d", "#7d3e3e", "#eb7f64", "#d9c67a", "#f3f2f2"].map(
+        (str) => color(str)
+    );
     return {
-        all, //the loose colours
+        all: all, //the loose colours
         bases: [0, 2, 4, 5].map((ix) => all[ix]),
-        skyBackground: 20,
-        landBackground: 20,
+        skyBackground: color(20),
+        landBackground: color(20),
     };
 }
 
+/**
+ * @typedef {Object} Ship
+ * @property {LandedFlyingState} state - whether the ship is landed / flying / respawning, etc.
+ * @property {p5.Vector} pos - position in world-space
+ * @property {p5.Vector} vel - velocity
+ * @property {number} height - height of ship - useful in ground-clearance checking
+ * @property {number} facing - current facing of ship, in radians (animates smoothly towards desiredRotation)
+ * @property {number} desiredFacing - desired facing of ship, in radians
+ * @property {number} fuel
+ * @property {p5.Color} thrustColour - colour to use for thrust particles
+ * @property {p5.Color} colour - colour of ship
+ * @property {LandingCheckResult} lastLandingCheck - result of last landing check (cleared each frame)
+ */
+
+/** @returns {Ship} */
 function createShip(palette) {
     return {
+        state: {
+            type: "flying",
+        },
         pos: createVector(width / 2, height / 2),
         vel: createVector(0, 0),
         height: 30,
@@ -958,6 +1015,17 @@ function zipWith(arrA, arrB, joinFn) {
     return outputs;
 }
 
+/**
+ * @typedef {Object} Terrain
+ * @property {p5.Vector[]} points - an array of world-space positions outlining the terrain
+ * @property {LandingPad[]} landingPads
+ */
+
+/**
+ *
+ * @param {Palette} palette
+ * @returns {Terrain}
+ */
 function createTerrain(palette) {
     const landingPads = createLandingPads(palette);
     const pts = [];
