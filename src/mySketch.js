@@ -470,7 +470,8 @@ function drawShipOverlay(ship) {
 }
 
 function drawFuelBar(ship) {
-    fill(100);
+    push();
+    fill(50);
     stroke("white");
     strokeWeight(0.5);
     const fullW = 20;
@@ -479,11 +480,11 @@ function drawFuelBar(ship) {
     rectMode(CORNER);
     rect(0, 0, fullW, h);
     const fuelW = ship.fuel * fullW;
-    fill("cyan");
+    fill(ship.thrustColour);
     noStroke();
     rect(0, 0, fuelW, h);
-
     // text("F:" + ((ship.fuel * 100).toFixed(1)) + "%", 0, 0)
+    pop();
 }
 
 function updateShip(ship) {
