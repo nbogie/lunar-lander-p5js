@@ -106,7 +106,7 @@ function postFlavourMessages() {
 }
 function restart() {
     //e.g. config.seed = 1756680251196;
-    config.seed = round(new Date());
+    config.seed = round(new Date().getMilliseconds());
     noiseSeed(config.seed);
 
     world = createWorld();
@@ -180,6 +180,9 @@ function createStarfield() {
     //todo: prune stars lower than terrain?
 }
 
+/**
+ * @returns {{colour: number|string, size: number, pos: p5.Vector}}
+ */
 function createStar() {
     return {
         colour: random() > 0.93 ? random(["skyblue", "pink"]) : 255,
@@ -263,7 +266,10 @@ function isFrameRateSlow(expectedRate, tolerance) {
 function drawDebugText() {
     push();
     const str = JSON.stringify(world.ship.state);
+
+    /** @type {Array<{t: string, colour?: number|string}>} */
     const outputs = [];
+
     outputs.push({
         t: "FPS " + frameRate().toFixed(0),
         colour: isFrameRateSlow(60, 0.1) ? "red" : "white",
@@ -276,7 +282,7 @@ function drawDebugText() {
 
     outputs.push({
         t: "fuel " + (world.ship.fuel * 100).toFixed(1) + "%",
-        colourForFuelMsg,
+        colour: colourForFuelMsg,
     });
 
     outputs.push({
@@ -289,6 +295,7 @@ function drawDebugText() {
 
     translate(200, 50);
     for (let { t, colour } of outputs) {
+        // @ts-ignore
         fill(colour ?? 255);
         noStroke();
         textSize(18);
@@ -710,6 +717,18 @@ function calcGroundClearance(ship) {
     return getHeightAt(ship.pos.x) - ship.pos.y - ship.height / 2;
 }
 
+/**
+ * @typedef {Object} LandingCheckResult
+ * @property {boolean} result - True if landing is allowed, false otherwise.
+ * @property {string} [reason] - Explanation for failure or warning.
+ * @property {"warning"} [type] - Indicates a warning (optional).
+ */
+
+/**
+ * Checks if the ship meets all conditions for a safe landing.
+ * @param {Object} ship - The ship object to check.
+ * @returns {LandingCheckResult} Landing check result object.
+ */
 function checkIsOkForLanding(ship) {
     if (ship.state.type !== "flying") {
         return {
@@ -877,7 +896,22 @@ function snapTo(val, increment) {
     return round(val / increment) * increment;
 }
 
+/**
+ * @typedef {Object} LandingPad
+ * @property {number} leftX - world-space x of left-most edge of pad
+ * @property {number} width
+ * @property {number} centreX - world-space x of centre of pad
+ * @property {p5.Color} colour - colour of the base (might be a string or number or Color object)
+ * @property {number} fuel - current fuel
+ * @property {number} maxFuel
+ * @property {string} name
+ */
+
+/** @returns {LandingPad[]} */
 function createLandingPads(palette) {
+    /**
+     * @returns {LandingPad}
+     */
     function createOneLandingPad({ frac, name, colour }) {
         const leftX = snapTo(frac * width, config.xStep);
         const padWidth = config.padWidth;
@@ -938,7 +972,6 @@ function createTerrain(palette) {
             prevY = y;
         }
         const pt = createVector(x, y);
-        pt.colour = nearPad ? "red" : "green";
         pts.push(pt);
     }
 
@@ -947,24 +980,36 @@ function createTerrain(palette) {
         landingPads,
     };
 }
-
+/**
+ * @param {number} x
+ * @param {LandingPad[]} landingPads
+ */
 function isNearAnyLandingPad(x, landingPads) {
-    return landingPads.some((pad) => isNearLandingPad(x, pad));
+    return landingPads.some((pad) => isWithinLandingPad(x, pad));
 }
 
+/**
+ * @param {number} x
+ */
 function landingPadAtXOrNull(x) {
-    return world.terrain.landingPads.find((pad) => isNearLandingPad(x, pad)) ?? null;
+    return world.terrain.landingPads.find((pad) => isWithinLandingPad(x, pad)) ?? null;
 }
 
 function nearestLandingPad(x) {
     return minBy(world.terrain.landingPads, (p) => distanceToLandingPad(p, x));
 }
-
+/**
+ * @param {number} x
+ * @param {LandingPad} pad
+ */
 function distanceToLandingPad(pad, x) {
     return abs(pad.centreX - x);
 }
-
-function isNearLandingPad(x, pad) {
+/**
+ * @param {number} x
+ * @param {LandingPad} pad
+ */
+function isWithinLandingPad(x, pad) {
     return x >= pad.leftX && x <= pad.leftX + pad.width;
 }
 
@@ -990,6 +1035,14 @@ function isUnderTerrain(ship) {
     return clearance < -5;
 }
 
+/**
+ * Creates an array by running a function a specified number of times.
+ *
+ * @template T
+ * @param {number} n The number of times to run the function.
+ * @param {function(number): T} fn The function to run for each iteration. It receives the current index as an argument and should return the value to be added to the array.
+ * @returns {Array<T>} An array containing the values returned by the function.
+ */
 function collect(n, fn) {
     const arr = [];
     for (let i = 0; i < n; i++) {
@@ -1244,7 +1297,9 @@ function updateAnyScreenShake() {
 }
 
 function cheatSetShipForEasyLanding(ship) {
-    const pad = random(world.terrain.landingPads);
+    /**@type {LandingPad[]} */
+    const allPads = world.terrain.landingPads;
+    const pad = random(allPads);
     ship.pos = createVector(
         pad.leftX + pad.width / 2,
         getHeightAt(pad.leftX) - 40 - ship.height / 2
