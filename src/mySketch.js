@@ -840,7 +840,9 @@ function createLandingPads(palette) {
     });
 
     const baseNames = shuffle(
-        "Able Baker Charlie Dog Echo Fox Inigo Lima Oscar Patel Tango Shiffman Whiskey".split(" ")
+        "Able Baker Charlie Dog Echo Fox Inigo Lima Oscar Patel Reynolds Tango Shiffman Whiskey".split(
+            " "
+        )
     );
     const colours = shuffle([...palette.bases]);
 
