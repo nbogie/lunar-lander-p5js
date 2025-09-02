@@ -211,8 +211,9 @@ function updateParticles() {
  * @param {WindParticle} p
  */
 function updateWindParticle(p) {
-    p.vel = createVector(createWindAt(p.pos), 0);
-    p.pos.add(p5.Vector.mult(p.vel, 100));
+    const xVel = createWindAt(p.pos) * 100;
+    p.pos.x += xVel;
+
     if (p.pos.x < -20 || p.pos.x > width + 20) {
         p.pos.x = random(width);
     }
@@ -378,7 +379,6 @@ function createWindParticles(palette) {
 /**
  * @typedef {Object} WindParticle
  * @property {p5.Vector} pos
- * @property {number} vel
  * @property {number} size
  * @property {p5.Color} colour - used when not in rainbow mode
  * @property {p5.Color} rainbowColour - used in rainbow mode
@@ -392,7 +392,6 @@ function createWindParticle(palette) {
 
     return {
         pos,
-        vel: createWindAt(pos),
         size: 1,
         colour: generateSubtleWindColour(),
         rainbowColour: random(palette.bases),
