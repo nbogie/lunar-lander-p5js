@@ -48,6 +48,8 @@ let config = {
     debugMessagesEnabled: true,
     rainbowWindEnabled: false,
     drawSunAsLines: false,
+    zenModeEnabled: false,
+    zenModeBackup: {},
     matter: {
         enabled: false, //sketch restart and matter.js and poly-decomp libraries will be required if enabled
         debugRendererEnabled: false, //sketch restart required
@@ -1026,7 +1028,7 @@ function keyPressed() {
     }
 
     if (key === "m") {
-        world.messages = [];
+        clearMessages();
     }
 
     if (key === "s") {
@@ -1052,8 +1054,51 @@ function keyPressed() {
     if (key === "x") {
         cheatSetShipForEasyLanding(world.ship);
     }
+
+    if (key === "z") {
+        toggleZenMode();
+    }
+}
+function zenModePropertyKeys() {
+    return ["windEnabled", "debugMessagesEnabled", "starsEnabled"];
 }
 
+function saveConfigForZenMode() {
+    const backup = [];
+    for (let key of zenModePropertyKeys()) {
+        backup[key] = config[key];
+    }
+    return backup;
+}
+
+function toggleZenMode() {
+    config.zenModeEnabled = !config.zenModeEnabled;
+    if (config.zenModeEnabled) {
+        config.zenModeBackup = saveConfigForZenMode();
+        let delay = 0;
+        for (let key of zenModePropertyKeys()) {
+            setTimeout(() => (config[key] = false), delay);
+            delay += 500;
+        }
+        setTimeout(clearMessages, delay);
+    } else {
+        restoreConfigAfterZenMode();
+    }
+}
+
+function restoreConfigAfterZenMode() {
+    let delay = 0;
+    for (let key of [...zenModePropertyKeys()].reverse()) {
+        const savedVal = config.zenModeBackup[key];
+        if (savedVal !== undefined) {
+            setTimeout(() => (config[key] = savedVal), delay);
+            delay += 500;
+        }
+    }
+}
+function clearMessages() {
+    world.messages = [];
+}
 function toggleConfigBoolean(key, label) {
     config[key] = !config[key];
     const desc = config[key] ? "enabled" : "disabled";
@@ -1066,6 +1111,7 @@ function postInstructionalMessages({ all } = { all: false }) {
         "up arrow to thrust",
         "'r' to restart / regenerate",
         "'w' to toggle wind",
+        "'z' for zen mode",
         "'h' for fuller help",
     ];
 
