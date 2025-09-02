@@ -376,6 +376,8 @@ function drawLandingPadLabel(pad) {
     textAlign(CENTER, TOP);
     fill("white");
     noStroke();
+    textSize(12);
+
     text(pad.name, 0, 0);
     pop();
 }
@@ -581,7 +583,8 @@ function drawLastLandingCheckWarning(ship) {
     push();
     fill(world.palette.all[5]);
     noStroke();
-    textSize(18);
+    textSize(12);
+
     textAlign(CENTER);
     translate(pad.centreX, getHeightAt(pad.centreX) + 60);
     text(lastLandingCheck.reason, 0, 0);
@@ -663,7 +666,7 @@ function drawMessages() {
     push();
     translate(width - 50, 50);
     for (let m of world.messages) {
-        textSize(17);
+        textSize(18);
         textAlign(RIGHT);
         noStroke();
         fill("white");
