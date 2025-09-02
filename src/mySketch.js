@@ -713,8 +713,12 @@ function getTiltAngle(ship) {
 }
 
 // see normalizeRotationAsTilt.  Achieves the same result, but with one more division.
-function normalizeRotationAsTiltAlternativeMethod(raw) {
-    return ((((raw - PI) % TWO_PI) + TWO_PI) % TWO_PI) - PI;
+function modFlooredAlwaysPositive(n, m) {
+    return ((n % m) + m) % m;
+}
+//converts a rotation in range -inf to +inf into range -179.999 to +180
+function normalizeRotationAsTiltAlternativeMethod(rawRotation) {
+    return -PI + modFlooredAlwaysPositive(rawRotation - PI, TWO_PI);
 }
 
 //converts a rotation in range -inf to +inf into range -179.999 to +180
