@@ -218,7 +218,10 @@ function updateWindParticle(p) {
         p.pos.x = random(width);
     }
 }
-
+/**
+ *
+ * @param {ThrustParticle} p
+ */
 function updateParticle(p) {
     p.pos.add(p.vel);
 
@@ -258,6 +261,9 @@ function createThrustParticle(pos, vel, colour) {
     };
 }
 
+/**
+ * @param {Star} star
+ */
 function drawStar(star) {
     push();
     stroke(star.colour);
@@ -270,7 +276,6 @@ function drawStar(star) {
 }
 
 /**
- *
  * @param {Explosion} explosion
  */
 function drawExplosion(explosion) {
@@ -355,7 +360,10 @@ function composeVerticalSpeedMessage() {
 function drawThrustParticles() {
     world.particles.forEach(drawThrustParticle);
 }
-
+/**
+ *
+ * @param {ThrustParticle} p
+ */
 function drawThrustParticle(p) {
     push();
     stroke(p.colour); //all[2] is vibrant
@@ -446,7 +454,9 @@ function drawLandingPadExtras() {
         drawLandingPadLabel(pad);
     }
 }
-
+/**
+ * @param {LandingPad} pad
+ */
 function drawLandingPadLabel(pad) {
     push();
     const x = pad.leftX + pad.width / 2;
@@ -459,6 +469,9 @@ function drawLandingPadLabel(pad) {
     pop();
 }
 
+/**
+ * @param {LandingPad} pad
+ */
 function drawLandingPadPlatform(pad) {
     push();
     translate(pad.leftX, getHeightAt(pad.leftX));
@@ -472,6 +485,9 @@ function drawLandingPadPlatform(pad) {
     pop();
 }
 
+/**
+ * @param {LandingPad} pad
+ */
 function drawLandingPadFuelTank(pad) {
     push();
     const w = pad.width / 2.5;
@@ -502,6 +518,9 @@ function drawLandingPadFuelTank(pad) {
     pop();
 }
 
+/**
+ * @param {number} x
+ */
 function drawLandingPadFlagAt(x) {
     const flagHeight = 20;
     const flagWidth = 10;
@@ -553,6 +572,9 @@ function drawShip(ship) {
     pop();
 }
 
+/**
+ * @param {Ship} ship
+ */
 function drawShipOverlay(ship) {
     push();
     translate(0, -20);
@@ -560,7 +582,6 @@ function drawShipOverlay(ship) {
     pop();
 }
 /**
- *
  * @param {Ship} ship
  */
 function drawFuelBar(ship) {
@@ -688,6 +709,9 @@ function fireThrusters() {
     addParticleEffectsFromThrusters(thrustVec);
 }
 
+/**
+ * @param {p5.Vector} thrustVec - direction and magnitude of the thrust particle (direction already rotated)
+ */
 function addParticleEffectsFromThrusters(thrustVec) {
     //Currently the body of the ship gets drawn rotated by -PI/2.  These offsets reflect that.
     const thrusterOffsets = [createVector(-10, 10), createVector(-10, -10)];
@@ -751,9 +775,8 @@ function createWindAt(pos) {
  */
 
 /**
- *
  * @param {string} str - text of the message
- * @param {number} durationMs  - duration in milliseconds for the message to be displayed
+ * @param {number?} durationMs  - duration in milliseconds for the message to be displayed. defaults if not provided.
  */
 function postMessage(str, durationMs = 5000) {
     /** @type {Message} */
@@ -787,6 +810,10 @@ function drawMessages() {
  * @typedef {Object} Explosion
  */
 
+/**
+ *
+ * @param {p5.Vector} pos - position at which to spawn explosion
+ */
 function spawnExplosion(pos) {
     /** @type {Explosion} */
     const explosion = {
@@ -863,7 +890,6 @@ function checkIsOkForLanding(ship) {
     }
 }
 /**
- *
  * @param {Ship} ship
  * @returns number angle between -PI and PI (-180 to 180), where 0 represents a perfectly level ship.
  */
@@ -1066,7 +1092,10 @@ function snapTo(val, increment) {
  * @property {string} name
  */
 
-/** @returns {LandingPad[]} */
+/**
+ * @param {Palette} palette
+ * @returns {LandingPad[]}
+ */
 function createLandingPads(palette) {
     /**
      * @returns {LandingPad}
@@ -1177,6 +1206,11 @@ function spawnPosition() {
     return createVector(100, 50);
 }
 
+/**
+ *
+ * @param {number} x - x co-ordinate at which ground level should be found
+ * @returns {number} - y co-ordinate of ground (in world-space) at given x position
+ */
 function getHeightAt(x) {
     const points = world.terrain.points;
     const ptAfter = points.find((pt) => pt.x > x);
@@ -1190,6 +1224,10 @@ function getHeightAt(x) {
     return map(x, ptBefore.x, ptAfter.x, ptBefore.y, ptAfter.y, true);
 }
 
+/**
+ * @param {Ship} ship
+ * @returns {boolean}
+ */
 function isUnderTerrain(ship) {
     const clearance = calcGroundClearance(ship);
     return clearance < -5;
@@ -1388,6 +1426,9 @@ function toggleConfigBoolean(key, label) {
     postMessage(label + " " + desc);
 }
 
+/**
+ * @param {{all?:boolean}} options - option.all controls whether all messages are posted or just the most fundamental ones.
+ */
 function postInstructionalMessages({ all } = { all: false }) {
     const coreMessages = [
         "left & right arrows to rotate",
@@ -1410,6 +1451,9 @@ function postInstructionalMessages({ all } = { all: false }) {
     postMessagesAtIntervals(msgs);
 }
 
+/**
+ * @param {string[]} msgs
+ */
 function postMessagesAtIntervals(msgs) {
     const spacingMs = 1000;
     const duration = 10000;
@@ -1441,6 +1485,9 @@ function updateAnyScreenShake() {
     world.screenShakeAmt = constrain(world.screenShakeAmt - 0.01, 0, 1);
 }
 
+/**
+ * @param {Ship} ship
+ */
 function cheatSetShipForEasyLanding(ship) {
     /**@type {LandingPad[]} */
     const allPads = world.terrain.landingPads;
