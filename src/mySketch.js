@@ -46,7 +46,7 @@ let config = {
     screenShakeEnabled: true,
     starsEnabled: true,
     debugMessagesEnabled: true,
-    rainbowWindEnabled: false,
+    rainbowWindEnabled: true,
     drawSunAsLines: true,
     zenModeEnabled: false,
     zenModeBackup: {},
@@ -291,11 +291,11 @@ function drawThrustParticle(p) {
     pop();
 }
 
-function createWindParticles() {
-    return collect(config.numWindParticles, createWindParticle);
+function createWindParticles(palette) {
+    return collect(config.numWindParticles, () => createWindParticle(palette));
 }
 
-function createWindParticle() {
+function createWindParticle(palette) {
     const pos = createVector(random(width), random(height));
 
     return {
@@ -303,16 +303,8 @@ function createWindParticle() {
         vel: createWindAt(pos),
         size: 1,
         colour: generateSubtleWindColour(),
-        rainbowColour: generateRainbowWindColour(),
+        rainbowColour: random(palette.bases),
     };
-}
-
-function generateRainbowWindColour() {
-    push();
-    colorMode(HSB);
-    const colour = color(random(360), 80, 100);
-    pop();
-    return colour;
 }
 
 function generateSubtleWindColour() {
@@ -778,7 +770,7 @@ function createWorld() {
         terrain: createTerrain(palette),
         explosions: [],
         particles: [],
-        windParticles: createWindParticles(),
+        windParticles: createWindParticles(palette),
         stars: createStarfield(),
         messages: [],
         palette,
