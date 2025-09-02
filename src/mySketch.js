@@ -33,6 +33,8 @@
 // * incorporate ideas from "desert golf" game
 // * make wind visualisation more efficient (e.g. periodically spawn replacement short-lived wind particles across a loose grid to ensure coverage, rather than relying on coverage through large numbers)
 // * complete a switch-over to matter.js physics engine
+// * space sfx - web audio?
+// * garbled radio talk (like scratched w timeshaper?)
 
 let world;
 
