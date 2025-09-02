@@ -47,7 +47,7 @@ let config = {
     starsEnabled: true,
     debugMessagesEnabled: true,
     rainbowWindEnabled: false,
-    drawSunAsLines: false,
+    drawSunAsLines: true,
     zenModeEnabled: false,
     zenModeBackup: {},
     matter: {
@@ -56,12 +56,15 @@ let config = {
     },
 };
 
+/** Saved only to allow setting focus once the underlying canvas is ready. Seems necessary for openprocessing. */
+let p5Canvas;
+
 function setup() {
     const mainCanvasHeight =
         config.matter.enabled && config.matter.debugRendererEnabled
             ? windowHeight / 2
             : windowHeight;
-    createCanvas(windowWidth, mainCanvasHeight);
+    p5Canvas = createCanvas(windowWidth, mainCanvasHeight);
 
     config.matter.enabled && setupMatterJS();
     frameRate(60);
@@ -87,7 +90,9 @@ function drawBall(b) {
 
     pop();
 }
+
 function draw() {
+    focusCanvasOnce();
     background(world.palette.skyBackground);
     push();
     config.screenShakeEnabled && applyAnyScreenShake();
@@ -1181,5 +1186,13 @@ function togglePause() {
         noLoop();
     } else {
         loop();
+    }
+}
+
+function focusCanvasOnce() {
+    //Only for openprocessing, doing this on earlier frames doesn't reliably work -
+    // perhaps it's taking the focus away when loading the sketch?
+    if (frameCount === 30) {
+        p5Canvas.elt.focus();
     }
 }
