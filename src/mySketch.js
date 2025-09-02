@@ -176,17 +176,27 @@ function drawStarfield() {
     world.stars.forEach(drawStar);
 }
 
+/**
+ * @typedef {Object} Star
+ * @property {p5.Vector} pos
+ * @property {p5.Color} colour
+ * @property {number} size
+ */
+
+/**
+ * @returns {Star[]}
+ */
 function createStarfield() {
     return collect(100, createStar);
     //todo: prune stars lower than terrain?
 }
 
 /**
- * @returns {{colour: number|string, size: number, pos: p5.Vector}}
+ * @returns {Star}
  */
 function createStar() {
     return {
-        colour: random() > 0.93 ? random(["skyblue", "pink"]) : 255,
+        colour: color(random() > 0.93 ? random(["skyblue", "pink"]) : 255),
         size: random(0.4, 1),
         pos: createVector(random(width), random(height)),
     };
@@ -196,7 +206,10 @@ function updateParticles() {
     world.particles.forEach(updateParticle);
     world.particles = world.particles.filter((p) => !p.isDead);
 }
-
+/**
+ *
+ * @param {WindParticle} p
+ */
 function updateWindParticle(p) {
     p.vel = createVector(createWindAt(p.pos), 0);
     p.pos.add(p5.Vector.mult(p.vel, 100));
@@ -215,7 +228,23 @@ function updateParticle(p) {
         p.isDead = true;
     }
 }
+/**
+ * @typedef {Object} ThrustParticle
+ * @property {p5.Vector} pos
+ * @property {p5.Vector} vel
+ * @property {boolean} isDead
+ * @property {number} startFrame
+ * @property {number} maxAge
+ * @property {p5.Color} colour
+ * @property {number} size
+ */
 
+/**
+ * @param {p5.Vector} pos
+ * @param {p5.Vector} vel
+ * @param {p5.Color} colour
+ * @returns {ThrustParticle}
+ */
 function createThrustParticle(pos, vel, colour) {
     return {
         pos: pos.copy(),
@@ -239,8 +268,13 @@ function drawStar(star) {
     pop();
 }
 
+/**
+ *
+ * @param {Explosion} explosion
+ */
 function drawExplosion(explosion) {
     push();
+
     const numPts = random(3, 7);
     beginShape();
     noFill();
@@ -333,10 +367,26 @@ function drawThrustParticle(p) {
     pop();
 }
 
+/**
+ * @param {Palette} palette
+ * @returns {WindParticle[]}
+ */
 function createWindParticles(palette) {
     return collect(config.numWindParticles, () => createWindParticle(palette));
 }
 
+/**
+ * @typedef {Object} WindParticle
+ * @property {p5.Vector} pos
+ * @property {number} vel
+ * @property {number} size
+ * @property {p5.Color} colour - used when not in rainbow mode
+ * @property {p5.Color} rainbowColour - used in rainbow mode
+ */
+/**
+ * @param {Palette} palette
+ * @returns {WindParticle}
+ */
 function createWindParticle(palette) {
     const pos = createVector(random(width), random(height));
 
@@ -352,7 +402,9 @@ function createWindParticle(palette) {
 function generateSubtleWindColour() {
     return random([150, 100]);
 }
-
+/**
+ * @param {WindParticle} p
+ */
 function drawWindParticle(p) {
     const strength = createWindAt(p.pos);
     if (strength === 0) {
@@ -463,6 +515,10 @@ function drawLandingPadFlagAt(x) {
     pop();
 }
 
+/**
+ *
+ * @param {Ship} ship
+ */
 function drawShip(ship) {
     function drawBooster() {
         rect(-8, 0, 5, 5);
@@ -497,13 +553,17 @@ function drawShip(ship) {
 
     pop();
 }
+
 function drawShipOverlay(ship) {
     push();
     translate(0, -20);
     drawFuelBar(ship);
     pop();
 }
-
+/**
+ *
+ * @param {Ship} ship
+ */
 function drawFuelBar(ship) {
     push();
     fill(50);
@@ -521,7 +581,10 @@ function drawFuelBar(ship) {
     // text("F:" + ((ship.fuel * 100).toFixed(1)) + "%", 0, 0)
     pop();
 }
-
+/**
+ *
+ * @param {Ship} ship
+ */
 function updateShip(ship) {
     ship.lastLandingCheck = undefined;
     if (ship.state.type === "landed") {
@@ -594,7 +657,9 @@ function updateShip(ship) {
         }
     }
 }
-
+/**
+ * @param {Ship} ship
+ */
 function drawLastLandingCheckWarning(ship) {
     const lastLandingCheck = ship.lastLandingCheck;
     if (!lastLandingCheck || lastLandingCheck.type !== "warning") {
@@ -661,7 +726,10 @@ function getRotatedPositionOfOffsetPoint(parentPos, parentRotation, relativePosi
     rotatedOffset.rotate(parentRotation);
     return p5.Vector.add(parentPos, rotatedOffset);
 }
-
+/**
+ * @param {p5.Vector} pos
+ * @returns {number} - x component of the wind.  For now wind has no y component.
+ */
 function createWindAt(pos) {
     if (!config.windEnabled) {
         return 0;
@@ -676,12 +744,26 @@ function createWindAt(pos) {
     return speed;
 }
 
+/**
+ * @typedef {Object} Message
+ * @property {string} msg - text of message
+ * @property {number} postTime - time message was posted, in milliseconds
+ * @property {number} durationMs - duration (in milliseconds) for which the message should be displayed
+ */
+
+/**
+ *
+ * @param {string} str - text of the message
+ * @param {number} durationMs  - duration in milliseconds for the message to be displayed
+ */
 function postMessage(str, durationMs = 5000) {
-    world.messages.push({
+    /** @type {Message} */
+    const message = {
         msg: str,
         postTime: millis(),
         durationMs,
-    });
+    };
+    world.messages.push(message);
 }
 
 function updateMessages() {
@@ -702,17 +784,24 @@ function drawMessages() {
     }
     pop();
 }
+/**
+ * @typedef {Object} Explosion
+ */
 
 function spawnExplosion(pos) {
-    world.explosions.push({
+    /** @type {Explosion} */
+    const explosion = {
         pos: pos.copy(),
         startFrame: frameCount,
-    });
+    };
+
+    world.explosions.push(explosion);
 }
 /**
  * Returns the distance between base of ship and ground at ship's x pos.
  * Negative clearance means the base of the ship is penetrating the ground.
  * Doesn't consider rotation of the ship.
+ * @param {Ship} ship
  */
 function calcGroundClearance(ship) {
     return getHeightAt(ship.pos.x) - ship.pos.y - ship.height / 2;
@@ -774,7 +863,11 @@ function checkIsOkForLanding(ship) {
         };
     }
 }
-
+/**
+ *
+ * @param {Ship} ship
+ * @returns number angle between -PI and PI (-180 to 180), where 0 represents a perfectly level ship.
+ */
 function getTiltAngle(ship) {
     return normalizeRotationAsTiltAlternativeMethod(ship.facing + PI / 2);
 }
@@ -783,6 +876,7 @@ function getTiltAngle(ship) {
 function modFlooredAlwaysPositive(n, m) {
     return ((n % m) + m) % m;
 }
+
 //converts a rotation in range -inf to +inf into range -179.999 to +180
 function normalizeRotationAsTiltAlternativeMethod(rawRotation) {
     return -PI + modFlooredAlwaysPositive(rawRotation - PI, TWO_PI);
@@ -805,10 +899,15 @@ function normalizeRotationAsTilt(rawRotation) {
     return normalized;
 }
 
+/**
+ * @param {Ship} ship
+ */
 function isShipLevel(ship) {
     return abs(getTiltAngle(ship)) < PI / 5;
 }
-
+/**
+ * @param {Ship} ship - ship to update
+ */
 function setLandedShip(ship) {
     ship.state = {
         type: "landed",
@@ -824,7 +923,9 @@ function setLandedShip(ship) {
         postMessage("Landed at " + pad.name + " base");
     }
 }
-
+/**
+ * @param {Ship} ship - ship to update
+ */
 function setShipUprightImmediately(ship) {
     ship.desiredFacing = 0 - PI / 2;
     ship.facing = ship.desiredFacing;
@@ -841,21 +942,15 @@ function respawnShip() {
 }
 
 /**
- * @typedef {Object} LandedFlyingState
- * @property {"flying"|"landed"} type
- */
-
-/**
  * @typedef {Object} World
  
  * @property {Ship} ship - the player's ship
  * @property {Terrain} terrain
- * @property {any[]} explosions
- * @property {any[]} explosions
- * @property {any[]} particles
- * @property {any[]} windParticles
- * @property {any[]} stars
- * @property {any[]} messages
+ * @property {Explosion[]} explosions
+ * @property {ThrustParticle[]} particles
+ * @property {WindParticle[]} windParticles
+ * @property {Star[]} stars
+ * @property {Message[]} messages
  * @property {Palette} palette
  * @property {number} screenShakeAmt - 0 means no screenshake.  diminishes over time.
  * @property {number} moonShadowFraction
@@ -918,6 +1013,11 @@ function createPalette() {
 }
 
 /**
+ * @typedef {Object} LandedFlyingState
+ * @property {"flying"|"landed"} type
+ */
+
+/**
  * @typedef {Object} Ship
  * @property {LandedFlyingState} state - whether the ship is landed / flying / respawning, etc.
  * @property {p5.Vector} pos - position in world-space
@@ -931,7 +1031,10 @@ function createPalette() {
  * @property {LandingCheckResult} lastLandingCheck - result of last landing check (cleared each frame)
  */
 
-/** @returns {Ship} */
+/**
+ * @param {Palette} palette - palette to draw colours from
+ * @returns {Ship}
+ */
 function createShip(palette) {
     return {
         state: {
@@ -1003,16 +1106,6 @@ function createLandingPads(palette) {
             colour: colours[ix % colours.length],
         })
     );
-}
-
-function zipWith(arrA, arrB, joinFn) {
-    const outputs = [];
-    const shorterLen = min(arrA.length, arrB.length);
-    for (let ix = 0; ix < shorterLen; ix++) {
-        const newElem = joinFn(arrA[ix], arrB[ix], ix);
-        outputs.push(newElem);
-    }
-    return outputs;
 }
 
 /**
@@ -1103,21 +1196,6 @@ function isUnderTerrain(ship) {
     return clearance < -5;
 }
 
-/**
- * Creates an array by running a function a specified number of times.
- *
- * @template T
- * @param {number} n The number of times to run the function.
- * @param {function(number): T} fn The function to run for each iteration. It receives the current index as an argument and should return the value to be added to the array.
- * @returns {Array<T>} An array containing the values returned by the function.
- */
-function collect(n, fn) {
-    const arr = [];
-    for (let i = 0; i < n; i++) {
-        arr.push(fn(i));
-    }
-    return arr;
-}
 function drawOtherMoon() {
     const { x, y, radius: radiusMain, colour, shadowColour } = defaultOtherMoonData();
 
@@ -1404,20 +1482,60 @@ function focusCanvasOnce() {
     }
 }
 
-function minBy(arr, fn) {
+/**
+ * Return the minimum element in the given input array as evaluated by the given function.
+ * @template A
+ * @param {A[]} arr
+ * @param {function(A): number} evalByFn - function to use to extract a value from each element in turn for comparison with < operator.
+ * @returns {A|undefined} - the element from the input arr which yielded the least value when passed through evalByFn.  Or undefined if the array is empty or undefined.
+ */
+function minBy(arr, evalByFn) {
     if (!arr || arr.length === 0) {
         return undefined;
     }
     let minVal = Infinity;
     let minElement = undefined;
     for (const candidateElement of arr) {
-        const val = fn(candidateElement);
+        const val = evalByFn(candidateElement);
         if (val < minVal) {
             minVal = val;
             minElement = candidateElement;
         }
     }
     return minElement;
+}
+
+/**
+ * Creates an array by running a function a specified number of times.
+ *
+ * @template T
+ * @param {number} n The number of times to run the function.
+ * @param {function(number): T} fn The function to run for each iteration. It receives the current index as an argument and should return the value to be added to the array.
+ * @returns {Array<T>} An array containing the values returned by the function.
+ */
+function collect(n, fn) {
+    const arr = [];
+    for (let i = 0; i < n; i++) {
+        arr.push(fn(i));
+    }
+    return arr;
+}
+
+/**
+ * @template A, B, C
+ * @param {A[]} arrA
+ * @param {B[]} arrB
+ * @param {function(A, B, number): C} joinFn - function to use to combine each pair of elements from arrA and arrB.  Must return an element of final type C, which will be stored in the output array.
+ * @returns {C[]} - the collected array of new result elements after calling joinFn on each pair.
+ */
+function zipWith(arrA, arrB, joinFn) {
+    const outputs = [];
+    const shorterLen = min(arrA.length, arrB.length);
+    for (let ix = 0; ix < shorterLen; ix++) {
+        const newElem = joinFn(arrA[ix], arrB[ix], ix);
+        outputs.push(newElem);
+    }
+    return outputs;
 }
 
 //most from chat gpt - mostly for ideas and inspiration.
