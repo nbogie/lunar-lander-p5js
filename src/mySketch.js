@@ -21,27 +21,30 @@
 
 	Join the Birb's Nest Discord for friendly creative coding community
 	and future challenges and contributions: https://discord.gg/S8c7qcjw2b
+   
+    TODO:
+    * change the landing check returned object to be a list of checks so that
+        * an ILS can display ALL of them
+        * landings / crashes can be graded / reported in detail
+    * award pts for better landings
+    * award pts for low-altitude, high-speed flying
+    * award pts for loop-the-loop (track cumulative rotation)
+    * allow fuel-scooping "cosmic winds" (perhaps this is ship fuel or otherwise needed by bases)
+        * paint wind areas by gas colour
+    * incorporate deltaTime to support any frameRate
+    * add pumping of oxygen or other gases or liquids?
+    * use constraints to pick up and move cargo between locations
+    * have some cavernous levels with a ceiling    
+    * performance: simplify wind visualisation (e.g. periodically spawn replacement short-lived wind particles across a loose grid to ensure coverage, rather than relying on coverage through large numbers)
+    * complete a switch-over to matter.js physics engine
+    * add sound effects:
+    *   dynamically synthesised w web audio?  But don't kill CPU where sound files would be fine.
+    *   glug glug fuel pumping sounds?
+    *   garbled radio talk (like scratched w timeshaper?)
+    
+   DONE:
+    * move ILS msg under nearest base.  remove it if not near a base
 */
-
-// TODO:
-// * move ILS msg under nearest base.  remove it if not near a base
-// * change the landing check returned object to be a list of checks so that
-//   * an ILS can display ALL of them
-//   * landings / crashes can be graded / reported in detail
-// * award pts for better landings
-// * award pts for low-altitude, high-speed flying
-// * award pts for loop-the-loop (track cumulative rotation)
-// * allow fuel-scooping "cosmic winds" (perhaps this is ship fuel or otherwise needed by bases)
-// *   paint wind areas by gas colour
-// * incorporate deltaTime to support any frameRate
-// * add pumping of oxygen or other gases or liquids?
-// * use constraints to pick up and move cargo between locations
-// * have some cavernous levels with a ceiling
-// * incorporate ideas from "desert golf" game
-// * make wind visualisation more efficient (e.g. periodically spawn replacement short-lived wind particles across a loose grid to ensure coverage, rather than relying on coverage through large numbers)
-// * complete a switch-over to matter.js physics engine
-// * space sfx - web audio?
-// * garbled radio talk (like scratched w timeshaper?)
 
 let world;
 
@@ -377,7 +380,6 @@ function drawLandingPadLabel(pad) {
     fill("white");
     noStroke();
     textSize(12);
-
     text(pad.name, 0, 0);
     pop();
 }
@@ -1274,3 +1276,70 @@ function minBy(arr, fn) {
     }
     return minElement;
 }
+
+//most from chat gpt - mostly for ideas and inspiration.
+// a distorted text-to-speech could say this stuff a bit garbled.
+const thematicCommsMessages = {
+    preFlight: [
+        "All stations, go for launch.",
+        "Final systems check, standby for engine ignition.",
+        "We have liftoff.",
+        "Roger that, we are in the black.",
+        "Separation complete, heading to the lunar surface.",
+    ],
+    inFlight: [
+        "Approaching descent phase.",
+        "Initiating retro-burn.",
+        "We are on final approach.",
+        "Stabilizing attitude, adjusting thrust.",
+        "Touchdown sequence initiated.",
+    ],
+    landing: [
+        "Altitude: 100 meters.",
+        "50 meters, good to go.",
+        "We have contact. Roger that, we have contact.",
+        "The Eagle has landed.",
+        "Mission accomplished. The lunar surface is secure.",
+    ],
+    errorsAndEmergencies: [
+        "Warning: high-speed descent.",
+        "We are off course. Correcting vector.",
+        "We have a low fuel warning.",
+        "Aborting descent, repeat, aborting descent.",
+        "Mayday, Mayday. We've lost an engine.",
+        "Impact imminent.",
+    ],
+    funAndFlavor: [
+        "Well, that was a heck of a ride.",
+        "Looks like we're out of gas.",
+        "I've got a bad feeling about this.",
+        "Houston, we have a problem.",
+        "I'll be seeing you.",
+    ],
+    routineChecks: [
+        "Guidance and navigation, all green.",
+        "Propellant quantity reads nominal.",
+        "Telemetry data confirms a stable attitude.",
+        "System two power levels, checking.",
+        "Copy, we have a good lock on the landing site.",
+    ],
+    procedural: [
+        "Switching to manual.",
+        "Throttle up one percent.",
+        "Initiating burn in T-minus ten seconds.",
+        "Burn complete.",
+        "Stand by for landing leg deployment.",
+    ],
+    questionsAndClarifications: [
+        "Houston, what's our current velocity?",
+        "Confirming on the altitude call.",
+        "Say again on that last bit, we had a dropout.",
+        "Is that a hard or soft ground reading?",
+    ],
+    lowStakesCommentary: [
+        "Okay, let's see what this thing can do.",
+        "Looks like a good spot down there.",
+        "Alright, let's bring her home.",
+        "It's quieter down here than I expected.",
+    ],
+};
