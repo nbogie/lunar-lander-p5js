@@ -107,12 +107,11 @@ function draw() {
     background(world.palette.skyBackground);
     push();
 
-    const isZooming = keyIsDown(SHIFT);
-    updateCam(isZooming);
+    updateCam();
 
     scale(world.cam.scale);
 
-    if (isZooming) {
+    if (world.cam.isZooming) {
         const offset = calcScaledOffsetForFollowCam();
         translate(offset.x, offset.y);
     }
@@ -1083,6 +1082,7 @@ function createWorld() {
  * @typedef {Object} Cam
  * @property {number} desiredScale
  * @property {number} scale
+ * @property {boolean} isZooming
  */
 
 /**
@@ -1092,10 +1092,11 @@ function createCam() {
     return {
         desiredScale: 1,
         scale: 1,
+        isZooming: false,
     };
 }
-function updateCam(isZooming) {
-    world.cam.desiredScale = isZooming ? 2 : 1;
+function updateCam() {
+    world.cam.desiredScale = world.cam.isZooming ? 2 : 1;
 
     world.cam.scale = lerp(world.cam.scale, world.cam.desiredScale, 0.1);
 }
@@ -1477,10 +1478,18 @@ function keyPressed() {
     if (key === "z") {
         toggleZenMode();
     }
-    if (key === "Q") {
+    if (key === "2") {
+        toggleZoom();
+    }
+    if (key === "q") {
         save("lunar-lander-screenshot");
     }
 }
+
+function toggleZoom() {
+    world.cam.isZooming = !world.cam.isZooming;
+}
+
 function zenModePropertyKeys() {
     return ["windEnabled", "debugMessagesEnabled", "starsEnabled"];
 }
