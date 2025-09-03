@@ -7,6 +7,7 @@
 -   incorporate deltaTime to support any frameRate
 -   more with matter.js physics engine
 -   performance: simplify wind visualisation (e.g. periodically spawn replacement short-lived wind particles across a loose grid to ensure coverage, rather than relying on coverage through large numbers)
+-   better terrain with octave noise layers?
 
 ### Misc ideas
 
@@ -28,7 +29,9 @@
 -   [ ] inverted traverse (long x traversal while continually inverted)
 -   [ ] landing with no fuel left (more of an achievement than a stunt)
 -   [ ] fast from base to base
+-   [ ] base to base with very little fuel usage
 -   [ ] touch and go (land and take off within very short time)
+-   [ ] land in high wind
 -   have stunts award more fuel mid-flight?
 -   consider: do these stunts add to the core gameplay fun, or is this wrong direction?
 -   have stunts chain for multiplier bonus if they're performed in close succession (once we have more than loop-the-loop!)
@@ -39,6 +42,7 @@
 -   zombies. and you have to get out to pump gas / fix problems from time to time?
     -   you can set them on fire w exhaust / drop stuff on them
 -   have some cavernous levels with a ceiling
+-   occasional high winds. (with forecast when you're at base)
 
 ### Sounds
 
