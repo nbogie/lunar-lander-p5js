@@ -1752,6 +1752,7 @@ const thematicCommsMessages = {
  * @property {StuntRecord[]} log
  * @property {string|undefined} lastVisitedBaseName
  * @property {number|undefined} lastTakeOffTimeMs
+ * @property {number|undefined} lowAltitudeStartTimeMs
  */
 
 /**
@@ -1764,6 +1765,7 @@ function createStuntMonitor() {
         log: [],
         lastVisitedBaseName: undefined,
         lastTakeOffTimeMs: undefined,
+        lowAltitudeStartTimeMs: undefined,
     };
 }
 /**
@@ -1774,8 +1776,38 @@ function monitorStunts(ship) {
         awardStunt(ship, { type: "loop" });
         ship.stuntMonitor.lastFacing = ship.facing;
     }
+    //low-level flying streak
+    const lowAltitudeThreshold = 40;
+    if (
+        calcGroundClearance(ship) < lowAltitudeThreshold &&
+        abs(ship.vel.x) > 0.4 && //don't give it for hovering
+        xDistanceToEdgeOfNearestLandingPad(ship.pos.x) > 20 //don't give this away just for landing!
+    ) {
+        if (ship.stuntMonitor.lowAltitudeStartTimeMs === undefined) {
+            ship.stuntMonitor.lowAltitudeStartTimeMs = millis();
+        }
+        //check for possible long-low-altitude award
+        const duration = millis() - ship.stuntMonitor.lowAltitudeStartTimeMs;
+        //TODO: change this to the amount of distance covered in low altitude - that rewards fast passes more.
+        if (duration > 3000) {
+            awardStunt(ship, { type: "low-altitude", extra: (duration / 1000).toFixed(1) + "s" });
+            ship.stuntMonitor.lowAltitudeStartTimeMs = undefined;
+            //todo: don't clear this tracker but mark this duration awarded, allowing longer runs to be awarded too on same run.
+        }
+    } else {
+        ship.stuntMonitor.lowAltitudeStartTimeMs = undefined;
+    }
 }
 
+/**
+ *
+ * @param {number} x
+ * @returns  horizontal distance from the given x position to the nearest edge of the nearest landing pad. Elevation is not considered.
+ */
+function xDistanceToEdgeOfNearestLandingPad(x) {
+    const pad = nearestLandingPad(x);
+    return max(0, abs(x - pad.centreX) - pad.width / 2);
+}
 /**
  * @param {Ship} ship
  */
@@ -1784,11 +1816,12 @@ function clearStunts(ship) {
     ship.stuntMonitor.log = [];
     ship.stuntMonitor.lastTakeOffTimeMs = undefined;
     ship.stuntMonitor.lastVisitedBaseName = undefined;
+    ship.stuntMonitor.lowAltitudeStartTimeMs = undefined;
 }
 
 /**
  * @typedef {Object} StuntDetail
- * @property {"loop" |"fast-transfer"} type
+ * @property {"loop" |"fast-transfer"|"low-altitude"} type
  * @property {string} [extra]
  *
  * @param {Ship} ship - ship that performed the stunt
