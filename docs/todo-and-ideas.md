@@ -1,5 +1,6 @@
 # TODO:
 
+-   [ ] BUG: crashing with "not close to ground" - though the crash otherwise looks legit.
 -   [ ] particles for refuel
 -   [ ] particles for stunt award
 -   change the landing check returned object to be a list of checks so that an ILS can display ALL of them
@@ -17,6 +18,8 @@
 -   use constraints to pick up and move cargo between locations
 -   landings / crashes can be graded / reported in detail
 -   award pts for better landings
+-   thematic flavour text floats on the wind as partial text strings?
+-   auto-zoom into collision / landing sites?
 
 ### Stunts ideas
 
