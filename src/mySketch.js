@@ -106,6 +106,17 @@ function draw() {
     focusCanvasOnce();
     background(world.palette.skyBackground);
     push();
+
+    const isZooming = keyIsDown(SHIFT);
+    updateCam(isZooming);
+
+    scale(world.cam.scale);
+
+    if (isZooming) {
+        const offset = calcScaledOffsetForFollowCam();
+        translate(offset.x, offset.y);
+    }
+
     config.screenShakeEnabled && applyAnyScreenShake();
     updateShip(world.ship);
     updateParticles();
@@ -1034,7 +1045,7 @@ function respawnShip() {
  * @property {number} screenShakeAmt - 0 means no screenshake.  diminishes over time.
  * @property {number} moonShadowFraction
  * @property {any[]} bodies - bodies simulated by matter.js (currently  not used in gameplay)
- *
+ * @property {Cam} cam - for zooming, tracking ship, etc.
  **/
 
 /**
@@ -1056,6 +1067,7 @@ function createWorld() {
         palette,
         screenShakeAmt: 0,
         moonShadowFraction: random(0.1, 0.5),
+        cam: createCam(),
         bodies: [],
     };
 
@@ -1065,6 +1077,33 @@ function createWorld() {
     }
 
     return createdWorld;
+}
+
+/**
+ * @typedef {Object} Cam
+ * @property {number} desiredScale
+ * @property {number} scale
+ */
+
+/**
+ * @returns {Cam}
+ */
+function createCam() {
+    return {
+        desiredScale: 1,
+        scale: 1,
+    };
+}
+function updateCam(isZooming) {
+    world.cam.desiredScale = isZooming ? 2 : 1;
+
+    world.cam.scale = lerp(world.cam.scale, world.cam.desiredScale, 0.1);
+}
+
+function calcScaledOffsetForFollowCam() {
+    return createVector(width / 2, height / 2)
+        .div(world.cam.scale)
+        .sub(world.ship.pos);
 }
 
 /**
@@ -1437,6 +1476,9 @@ function keyPressed() {
 
     if (key === "z") {
         toggleZenMode();
+    }
+    if (key === "Q") {
+        save("lunar-lander-screenshot");
     }
 }
 function zenModePropertyKeys() {
