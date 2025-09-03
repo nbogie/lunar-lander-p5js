@@ -30,8 +30,23 @@
         * an ILS can display ALL of them
         * landings / crashes can be graded / reported in detail
     * award pts for better landings
-    * award pts for low-altitude, high-speed flying
-    * award pts for loop-the-loop (track cumulative rotation)
+    * award pts (with animated particles) for stunts such as:
+    * STUNT IDEAS
+    *   [x] loop-the-loop (track cumulative rotation)
+    *   [ ] low-altitude, high-speed flying
+    *   [ ] powered loop (where throttle is held down throughout) 
+    *   [ ] low-altitude loop (keep a separate track of rotation that resets whenever the ship is not at low alt.)
+    *   [ ] low-altitude inverted - touching nose to gnd.  would be easier with retros
+    *   [ ] inverted traverse (long x traversal while continually inverted)
+    *   [ ] landing with no fuel left (more of an achievement than a stunt)
+    *   [ ] fast from base to base
+    *   [ ] touch and go (land and take off within very short time)
+    *   have stunts award more fuel mid-flight?
+    *   consider: do these stunts add to the core gameplay fun, or is this wrong direction?
+    * 
+    *   have stunts chain for multiplier bonus if they're performed in close succession (once we have more than loop-the-loop!)
+    *   have stunts get forgotten about over time if we don't land soon after?
+    * 
     * allow fuel-scooping "cosmic winds" (perhaps this is ship fuel or otherwise needed by bases)
         * paint wind areas by gas colour
     * incorporate deltaTime to support any frameRate
@@ -40,6 +55,7 @@
     * have some cavernous levels with a ceiling    
     * performance: simplify wind visualisation (e.g. periodically spawn replacement short-lived wind particles across a loose grid to ensure coverage, rather than relying on coverage through large numbers)
     * complete a switch-over to matter.js physics engine
+    
     * add sound effects:
     *   dynamically synthesised w web audio?  But don't kill CPU where sound files would be fine.
     *   glug glug fuel pumping sounds?
@@ -333,6 +349,16 @@ function drawDebugText() {
     outputs.push({
         t: composeVerticalSpeedMessage(),
     });
+    outputs.push({
+        t: composeHorizontalSpeedMessage(),
+    });
+
+    outputs.push({
+        t: world.ship.stuntMonitor.log.length + " stunt(s)",
+    });
+    outputs.push({
+        t: composeLocatorMessage(),
+    });
 
     translate(200, 50);
     for (let { t, colour } of outputs) {
@@ -344,6 +370,33 @@ function drawDebugText() {
         translate(0, 25);
     }
     pop();
+}
+
+function composeLocatorMessage() {
+    const pos = world.ship.pos;
+    let xIndicator = "><";
+    if (pos.x < 0 || pos.x > width) {
+        const multiple = 1 + floor(abs((3 * pos.x) / width));
+        const symbol = pos.x < 0 ? "<" : ">";
+        xIndicator = symbol.repeat(multiple);
+    }
+    let yIndicator = "-";
+    if (pos.y < 0) {
+        const multiple = 1 + floor(abs((2 * pos.y) / height));
+        yIndicator = "^".repeat(multiple);
+    }
+    return xIndicator + " " + yIndicator;
+}
+function composeHorizontalSpeedMessage() {
+    const val = world.ship.vel.x;
+    let emoji = "0️⃣";
+    if (val < 0) {
+        //left arrow emoji
+        emoji = "⬅️";
+    } else if (val > 0) {
+        emoji = "➡️";
+    }
+    return "h speed " + emoji + " " + world.ship.vel.x.toFixed(1);
 }
 
 function composeVerticalSpeedMessage() {
@@ -598,15 +651,22 @@ function drawFuelBar(ship) {
     fill(ship.thrustColour);
     noStroke();
     rect(0, 0, fuelW, h);
+
+    fill(255);
     // text("F:" + ((ship.fuel * 100).toFixed(1)) + "%", 0, 0)
+    // text("S:" + ship.stuntMonitor.log.length, 0, -10);
     pop();
 }
+
 /**
  *
  * @param {Ship} ship
  */
 function updateShip(ship) {
     ship.lastLandingCheck = undefined;
+
+    // monitor for stunts
+    monitorStunts(ship);
     if (ship.state.type === "landed") {
         if (ship.fuel < 1) {
             const pad = landingPadAtXOrNull(ship.pos.x);
@@ -629,6 +689,9 @@ function updateShip(ship) {
                 };
                 const pad = landingPadAtXOrNull(ship.pos.x);
                 postMessage("Lift off from " + pad.name + " base");
+                ship.stuntMonitor.lastVisitedBaseName = pad.name;
+                ship.stuntMonitor.lastTakeOffTimeMs = millis();
+
                 tookOffThisFrame = true;
             }
         }
@@ -937,15 +1000,42 @@ function setLandedShip(ship) {
     ship.state = {
         type: "landed",
     };
+
     ship.vel = createVector(0, 0);
     ship.pos.y = getHeightAt(ship.pos.x) - ship.height / 2;
     setShipUprightImmediately(ship);
-    //(no immediate refuel)
+    //(note: we don't do an immediate refuel - it happens gradually each frame in updateShip if we're in suitable state)
 
     const pad = landingPadAtXOrNull(ship.pos.x);
     if (pad) {
         ship.thrustColour = pad.colour;
         postMessage("Landed at " + pad.name + " base");
+        processAnyBaseToBaseFlightTime(ship, pad);
+
+        //award points for all stunts
+        // postMessage("Stunt count: " + ship.stuntMonitor.log.length);
+    }
+    clearStunts(ship);
+}
+
+/**
+ * If we have flown from one base to another (without crashing), post flight time, and possibly log fast-transfer "stunt".
+ * @param {Ship} ship
+ * @param {LandingPad} pad
+ */
+function processAnyBaseToBaseFlightTime(ship, pad) {
+    if (
+        ship.stuntMonitor.lastVisitedBaseName !== undefined &&
+        pad.name !== ship.stuntMonitor.lastVisitedBaseName
+    ) {
+        const timeSinceTakeOff = millis() - ship.stuntMonitor.lastTakeOffTimeMs;
+        const timeStr = (timeSinceTakeOff / 1000).toFixed(3) + "s";
+        postMessage("Flight time: " + timeStr);
+
+        if (timeSinceTakeOff < 10000) {
+            const medalType = timeSinceTakeOff < 5000 ? "GOLD" : "Silver";
+            awardStunt(ship, { type: "fast-transfer", extra: timeStr + " " + medalType });
+        }
     }
 }
 /**
@@ -964,6 +1054,7 @@ function respawnShip() {
     world.ship.state = {
         type: "flying",
     };
+    clearStunts(world.ship);
 }
 
 /**
@@ -1054,6 +1145,7 @@ function createPalette() {
  * @property {p5.Color} thrustColour - colour to use for thrust particles
  * @property {p5.Color} colour - colour of ship
  * @property {LandingCheckResult} lastLandingCheck - result of last landing check (cleared each frame)
+ * @property {StuntMonitor} stuntMonitor
  */
 
 /**
@@ -1061,7 +1153,8 @@ function createPalette() {
  * @returns {Ship}
  */
 function createShip(palette) {
-    return {
+    /**@type {Ship} */
+    const createdShip = {
         state: {
             type: "flying",
         },
@@ -1074,9 +1167,12 @@ function createShip(palette) {
         thrustColour: palette.all[2],
         colour: palette.skyBackground, //arr[5],
         lastLandingCheck: undefined,
+        stuntMonitor: createStuntMonitor(),
     };
-}
+    clearStunts(createdShip);
 
+    return createdShip;
+}
 function snapTo(val, increment) {
     return round(val / increment) * increment;
 }
@@ -1648,3 +1744,58 @@ const thematicCommsMessages = {
         "I'll be seeing you.",
     ],
 };
+
+/**
+ * @typedef {{detail: StuntDetail, timeMs: number}} StuntRecord
+ * @typedef {Object} StuntMonitor
+ * @property {number} lastFacing
+ * @property {StuntRecord[]} log
+ * @property {string|undefined} lastVisitedBaseName
+ * @property {number|undefined} lastTakeOffTimeMs
+ */
+
+/**
+ *
+ * @returns {StuntMonitor}
+ */
+function createStuntMonitor() {
+    return {
+        lastFacing: 0,
+        log: [],
+        lastVisitedBaseName: undefined,
+        lastTakeOffTimeMs: undefined,
+    };
+}
+/**
+ * @param {Ship} ship
+ */
+function monitorStunts(ship) {
+    if (abs(ship.stuntMonitor.lastFacing - ship.facing) > TWO_PI) {
+        awardStunt(ship, { type: "loop" });
+        ship.stuntMonitor.lastFacing = ship.facing;
+    }
+}
+
+/**
+ * @param {Ship} ship
+ */
+function clearStunts(ship) {
+    ship.stuntMonitor.lastFacing = ship.facing;
+    ship.stuntMonitor.log = [];
+    ship.stuntMonitor.lastTakeOffTimeMs = undefined;
+    ship.stuntMonitor.lastVisitedBaseName = undefined;
+}
+
+/**
+ * @typedef {Object} StuntDetail
+ * @property {"loop" |"fast-transfer"} type
+ * @property {string} [extra]
+ *
+ * @param {Ship} ship - ship that performed the stunt
+ * @param {StuntDetail} detail
+ */
+function awardStunt(ship, detail) {
+    ship.stuntMonitor.log.push({ detail: detail, timeMs: millis() });
+    const extraOrNothing = detail.extra ? ` (${detail.extra})` : "";
+    postMessage(`${detail.type}${extraOrNothing}!`);
+}
