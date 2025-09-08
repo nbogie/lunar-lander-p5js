@@ -10,13 +10,16 @@ OUTPUT_FILE="dist/compiled.js"
 > "$OUTPUT_FILE"
 
 FILES=(
-    "mySketch.js"
+    "header.js"
     "config.js"
+    "setup.js"
+    "draw.js"
     "ship.js"
     "world.js"
     "camera.js"
     "explosions.js"
     "flavour.js"
+    "globals.js"
     "landingPads.js"
     "messages.js"
     "palette.js"
@@ -27,6 +30,7 @@ FILES=(
     "thrustParticles.js"
     "utils.js"
     "wind.js"
+    "unsorted.js"
     "myMatterStuff.js"
 )
 
