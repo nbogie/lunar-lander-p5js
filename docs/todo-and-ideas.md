@@ -3,12 +3,12 @@
 -   [ ] BUG: crashing with "not close to ground" - though the crash otherwise looks legit.
 -   [ ] particles for refuel
 -   [ ] particles for stunt award
--   change the landing check returned object to be a list of checks so that an ILS can display ALL of them
--   always show best transfer time as leaderboard
--   incorporate deltaTime to support any frameRate
--   more with matter.js physics engine
--   performance: simplify wind visualisation (e.g. periodically spawn replacement short-lived wind particles across a loose grid to ensure coverage, rather than relying on coverage through large numbers)
--   better terrain with octave noise layers?
+-   [ ] change the landing check returned object to be a list of checks so that an ILS can display ALL of them
+-   [ ] always show best transfer time as leaderboard
+-   [ ] incorporate deltaTime to support any frameRate
+-   [ ] more with matter.js physics engine
+-   [ ] performance: simplify wind visualisation (e.g. periodically spawn replacement short-lived wind particles across a loose grid to ensure coverage, rather than relying on coverage through large numbers)
+-   [ ] better terrain with octave noise layers?
 
 ### Misc ideas
 
@@ -25,7 +25,7 @@
 
 -   award pts (with animated particles) for stunts such as:
 -   [x] loop-the-loop (track cumulative rotation)
--   [ ] low-altitude, high-speed flying
+-   [x] low-altitude, high-speed flying
 -   [ ] powered loop (where throttle is held down throughout)
 -   [ ] low-altitude loop (keep a separate track of rotation that resets whenever the ship is not at low alt.)
 -   [ ] low-altitude inverted - touching nose to gnd. would be easier with retros
