@@ -1,0 +1,33 @@
+{
+    "name": "lunar-lander-p5js",
+    "version": "1.0.0",
+    "scripts": {
+        "build": "rimraf dist; ./build.sh",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "UNUSED-build": "rimraf dist; parcel build src/index.html --dist-dir dist --public-url ./",
+        "cloc": "npx cloc src"
+    },
+    "description": "A game in the lunar lander genre, written in javascript with p5.js",
+    "keywords": [
+        "game",
+        "p5.js",
+        "creative-coding"
+    ],
+    "homepage": "https://github.com/nbogie/lunar-lander-p5js#readme",
+    "bugs": {
+        "url": "https://github.com/nbogie/lunar-lander-p5js/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/nbogie/lunar-lander-p5js.git"
+    },
+    "license": "ISC",
+    "author": "nbogie",
+    "devDependencies": {
+        "parcel": "^2.15.4",
+        "rimraf": "^6.0.1"
+    },
+    "directories": {
+        "doc": "docs"
+    }
+}
