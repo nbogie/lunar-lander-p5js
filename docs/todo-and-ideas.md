@@ -38,10 +38,11 @@
 -   have stunts award more fuel mid-flight?
 -   consider: do these stunts add to the core gameplay fun, or is this wrong direction?
 -   have stunts chain for multiplier bonus if they're performed in close succession (once we have more than loop-the-loop!)
--   have stunts get forgotten about over time if we don't land soon after? \*
+-   have stunts get forgotten about over time if we don't land soon after?
 
 ### Threat ideas
 
+-   little walking people pods to rescue like in defender
 -   zombies. and you have to get out to pump gas / fix problems from time to time?
     -   you can set them on fire w exhaust / drop stuff on them
 -   have some cavernous levels with a ceiling
