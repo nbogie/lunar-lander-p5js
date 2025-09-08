@@ -14,6 +14,7 @@ FILES=(
     "config.js"
     "setup.js"
     "draw.js"
+    "debugText.js"
     "ship.js"
     "world.js"
     "camera.js"

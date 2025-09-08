@@ -174,3 +174,7 @@ function drawLandingPadFlagAt(x) {
     triangle(0, 0, flagWidth, 5, 0, 10);
     pop();
 }
+
+function snapTo(val, increment) {
+    return round(val / increment) * increment;
+}
