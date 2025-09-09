@@ -19,8 +19,8 @@ function drawExplosion(explosion) {
     colorMode(HSB);
     stroke(random(0, 50), 100, 100, 50);
 
+    const radius = map(abs(frameCount - explosion.startFrame - 15), 0, 30, 40, 10, true);
     for (let i = 0; i < numPts; i++) {
-        const radius = map(abs(frameCount - explosion.startFrame - 15), 0, 30, 40, 10, true);
         const p = p5.Vector.add(
             explosion.pos,
             p5.Vector.random2D().mult(randomGaussian(radius, radius * 0.3))
