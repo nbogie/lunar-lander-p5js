@@ -2,8 +2,6 @@
 //if matter.js is enabled in config, the matter.js poly-decomp libraries will be needed
 
 /** matter.js engine */
-let engine;
-
 const Engine = Matter.Engine,
     Runner = Matter.Runner,
     Composites = Matter.Composites,
