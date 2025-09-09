@@ -12,6 +12,8 @@ function isFrameRateSlow(expectedRate, tolerance) {
 }
 
 function keyPressed() {
+    //See also: ship controls ('a', 'd', 'w', and arrow keys) processed in updateShip
+
     if (key === "r") {
         restart();
     }
@@ -19,36 +21,43 @@ function keyPressed() {
         togglePause();
     }
 
-    if (key === "w") {
-        toggleConfigBoolean("windEnabled", "wind");
-    }
-
-    if (key === "h") {
+    if (key === "h" || key === "?") {
         postInstructionalMessages({ all: true });
     }
 
-    if (key === "d") {
+    if (key === "b") {
         toggleConfigBoolean("debugMessagesEnabled", "debug messages");
     }
 
-    if (key === "m") {
+    if (key === "c") {
         clearMessages();
     }
 
-    if (key === "s") {
+    if (key === "k") {
         toggleConfigBoolean("screenShakeEnabled", "screen-shake");
     }
 
-    if (key === "a") {
+    if (key === "1") {
+        toggleZoom();
+    }
+    if (key === "2") {
+        toggleConfigBoolean("windEnabled", "wind");
+    }
+
+    if (key === "3") {
+        toggleConfigBoolean("rainbowWindEnabled", "rainbow-wind");
+    }
+
+    if (key === "4") {
         toggleConfigBoolean("starsEnabled", "stars");
     }
 
-    if (key === "l") {
+    if (key === "5") {
         toggleConfigBoolean("drawSunAsLines", "draw sun as lines");
     }
 
-    if (key === "c") {
-        toggleConfigBoolean("rainbowWindEnabled", "rainbow-wind");
+    if (key === "0" || key === "z") {
+        toggleZenMode();
     }
 
     if (key === "e") {
@@ -59,12 +68,6 @@ function keyPressed() {
         cheatSetShipForEasyLanding(world.ship);
     }
 
-    if (key === "z") {
-        toggleZenMode();
-    }
-    if (key === "2") {
-        toggleZoom();
-    }
     if (key === "q") {
         save("lunar-lander-screenshot");
     }

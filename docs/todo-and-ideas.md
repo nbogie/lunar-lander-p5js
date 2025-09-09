@@ -58,4 +58,5 @@
 
 # DONE:
 
-move ILS msg under nearest base. remove it if not near a base
+-   [x] move ILS msg under nearest base. remove it if not near a base
+-   [x] add support for adws keys

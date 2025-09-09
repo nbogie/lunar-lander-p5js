@@ -42,20 +42,23 @@ function drawMessages() {
  */
 function postInstructionalMessages({ all } = { all: false }) {
     const coreMessages = [
-        "left & right arrows to rotate",
-        "up arrow to thrust",
+        "'a' & 'd' or left & right arrows to rotate",
+        "'w' or up arrow to thrust",
         "'r' to restart / regenerate",
-        "'w' to toggle wind",
-        "'z' for zen mode",
-        "'h' for fuller help",
+        "'2' to toggle wind",
+        "'z' to toggle zen mode",
+        "'h' to get complete help",
     ];
 
     const otherMessages = [
         "'p' to pause",
-        "'c' to toggle rainbow wind",
-        "'l' to toggle sun as lines",
-        "'d' to toggle debug text",
-        "'m' to clear these messages",
+        "'1' to toggle janky zoom",
+        "'3' to toggle rainbow wind",
+        "'4' to toggle stars",
+        "'5' to toggle sun as lines",
+        "'b' to toggle debug text",
+        "'k' to toggle screenshake",
+        "'c' to clear messages",
     ];
     const msgs = [...coreMessages, ...(all ? otherMessages : [])];
 

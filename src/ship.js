@@ -312,7 +312,10 @@ function updateShip(ship) {
     }
     let tookOffThisFrame = false;
 
-    if (keyIsDown(UP_ARROW)) {
+    if (
+        keyIsDown(UP_ARROW) ||
+        keyIsDown(87) //'w' key
+    ) {
         if (ship.fuel > 0) {
             fireThrusters();
             if (ship.state.type === "landed") {
@@ -330,11 +333,17 @@ function updateShip(ship) {
     }
 
     if (ship.state.type !== "landed") {
-        if (keyIsDown(LEFT_ARROW)) {
+        if (
+            keyIsDown(LEFT_ARROW) ||
+            keyIsDown(65) //'a' key
+        ) {
             ship.desiredFacing -= config.turnSpeed;
         }
 
-        if (keyIsDown(RIGHT_ARROW)) {
+        if (
+            keyIsDown(RIGHT_ARROW) ||
+            keyIsDown(68) //'d' key
+        ) {
             ship.desiredFacing += config.turnSpeed;
         }
     }
