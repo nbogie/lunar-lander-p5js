@@ -68,7 +68,14 @@ function drawShipOverlay(ship) {
 }
 
 /**
- * Checks if the ship meets all conditions for a safe landing.
+ * @typedef {Object} LandingCheckResult
+ * @property {boolean} result - True if landing is allowed, false otherwise.
+ * @property {string} [reason] - Explanation for failure or warning.
+ * @property {"warning"} [type] - Indicates a warning (optional).
+ */
+
+/**
+ * Checks if the ship meets all conditions for a safe landing.  Crashing is not handled here.
  * @param {Object} ship - The ship object to check.
  * @returns {LandingCheckResult} Landing check result object.
  */
@@ -229,22 +236,30 @@ function calcGroundClearance(ship) {
 }
 
 /**
- * @typedef {Object} LandingCheckResult
- * @property {boolean} result - True if landing is allowed, false otherwise.
- * @property {string} [reason] - Explanation for failure or warning.
- * @property {"warning"} [type] - Indicates a warning (optional).
- */
-
-/**
  * @param {Ship} ship
  */
 function isShipLevel(ship) {
     return abs(getTiltAngle(ship)) < PI / 5;
 }
+
+/**
+ *
+ * @param {Ship} ship
+ */
+function processShipTakeOff(ship) {
+    ship.state = {
+        type: "flying",
+    };
+    const pad = landingPadAtXOrNull(ship.pos.x);
+    postMessage("Lift off from " + pad.name + " base");
+    ship.stuntMonitor.lastVisitedBaseName = pad.name;
+    ship.stuntMonitor.lastTakeOffTimeMs = millis();
+}
+
 /**
  * @param {Ship} ship - ship to update
  */
-function setLandedShip(ship) {
+function processShipLanded(ship) {
     ship.state = {
         type: "landed",
     };
@@ -264,6 +279,18 @@ function setLandedShip(ship) {
         // postMessage("Stunt count: " + ship.stuntMonitor.log.length);
     }
     clearStunts(ship);
+}
+
+/**
+ *
+ * @param {Ship} ship
+ * @param {LandingCheckResult} landingCheck
+ */
+function processShipCrash(ship, landingCheck) {
+    spawnExplosion(ship.pos.copy());
+    respawnShip();
+    world.screenShakeAmt = 1;
+    postMessage("cause of crash: " + landingCheck.reason);
 }
 
 /**
@@ -294,58 +321,34 @@ function drawFuelBar(ship) {
  *
  * @param {Ship} ship
  */
+function refuelShipOneTick(ship) {
+    const pad = landingPadAtXOrNull(ship.pos.x);
+    const amtTransferred = config.refuelPerTick; // * deltaTime;
+    ship.fuel = constrain(ship.fuel + amtTransferred, 0, 1);
+    pad.fuel = constrain(pad.fuel - amtTransferred, 0, pad.maxFuel);
+    if (ship.fuel >= 1) {
+        postMessage("Refuelling complete");
+    }
+}
+
+/**
+ *
+ * @param {Ship} ship
+ */
 function updateShip(ship) {
     ship.lastLandingCheck = undefined;
 
-    // monitor for stunts
     monitorStunts(ship);
+
     if (ship.state.type === "landed") {
         if (ship.fuel < 1) {
-            const pad = landingPadAtXOrNull(ship.pos.x);
-            const amtTransferred = config.refuelPerTick; // * deltaTime;
-            ship.fuel = constrain(ship.fuel + amtTransferred, 0, 1);
-            pad.fuel = constrain(pad.fuel - amtTransferred, 0, pad.maxFuel);
-            if (ship.fuel >= 1) {
-                postMessage("Refuelling complete");
-            }
+            refuelShipOneTick(ship);
         }
     }
-    let tookOffThisFrame = false;
-
-    if (
-        keyIsDown(UP_ARROW) ||
-        keyIsDown(87) //'w' key
-    ) {
-        if (ship.fuel > 0) {
-            fireThrusters();
-            if (ship.state.type === "landed") {
-                ship.state = {
-                    type: "flying",
-                };
-                const pad = landingPadAtXOrNull(ship.pos.x);
-                postMessage("Lift off from " + pad.name + " base");
-                ship.stuntMonitor.lastVisitedBaseName = pad.name;
-                ship.stuntMonitor.lastTakeOffTimeMs = millis();
-
-                tookOffThisFrame = true;
-            }
-        }
-    }
+    let { tookOffThisFrame } = handleUserThrust(ship);
 
     if (ship.state.type !== "landed") {
-        if (
-            keyIsDown(LEFT_ARROW) ||
-            keyIsDown(65) //'a' key
-        ) {
-            ship.desiredFacing -= config.turnSpeed;
-        }
-
-        if (
-            keyIsDown(RIGHT_ARROW) ||
-            keyIsDown(68) //'d' key
-        ) {
-            ship.desiredFacing += config.turnSpeed;
-        }
+        handleUserSteering(ship);
     }
 
     ship.facing = lerp(ship.facing, ship.desiredFacing, 0.1);
@@ -353,34 +356,32 @@ function updateShip(ship) {
     if (ship.state.type === "landed") {
         return;
     }
+    //accelerate ship with gravity...
 
-    const gravity = createVector(0, 1).mult(config.gravity);
+    const gravity = createVector(0, config.gravity);
+    ship.vel.add(gravity);
+
+    //...and (optionally) accelerate ship with wind
     if (config.windEnabled) {
         const windSpeed = createWindAt(ship.pos);
         ship.vel.x += windSpeed;
     }
-    ship.vel.add(gravity);
+
     ship.pos.add(ship.vel);
 
     if (!tookOffThisFrame) {
         const landingCheck = checkIsOkForLanding(ship);
 
-        ship.lastLandingCheck = landingCheck; // for later rendering (e.g. in ILS)
+        ship.lastLandingCheck = landingCheck; // store for later rendering (e.g. in ILS)
 
         if (landingCheck.result) {
-            setLandedShip(ship);
-            return;
-        }
-
-        if (isUnderTerrain(ship)) {
-            //todo: spawn an explosion at crash site
-            spawnExplosion(ship.pos.copy());
-            respawnShip();
-            world.screenShakeAmt = 1;
-            postMessage("cause of crash: " + landingCheck.reason);
-        }
+            processShipLanded(ship);
+        } else if (isUnderTerrain(ship)) {
+            processShipCrash(ship, landingCheck);
+        } //else normal flight
     }
 }
+
 /**
  * @param {Ship} ship
  */
@@ -452,4 +453,44 @@ function getRotatedPositionOfOffsetPoint(parentPos, parentRotation, relativePosi
     let rotatedOffset = relativePosition.copy();
     rotatedOffset.rotate(parentRotation);
     return p5.Vector.add(parentPos, rotatedOffset);
+}
+
+/**
+ * @param {Ship} ship
+ * @returns {{tookOffThisFrame:boolean}} indicates if the thrust action has caused lift-off (if we were landed)
+ */
+function handleUserThrust(ship) {
+    if (
+        keyIsDown(UP_ARROW) ||
+        keyIsDown(87) //'w' key
+    ) {
+        if (ship.fuel > 0) {
+            fireThrusters();
+            if (ship.state.type === "landed") {
+                processShipTakeOff(ship);
+                return { tookOffThisFrame: true };
+            }
+        }
+    }
+    return { tookOffThisFrame: false };
+}
+
+/**
+ * take user inputs and steer ship accordingly
+ * @param {Ship} ship
+ */
+function handleUserSteering(ship) {
+    if (
+        keyIsDown(LEFT_ARROW) ||
+        keyIsDown(65) //'a' key
+    ) {
+        ship.desiredFacing -= config.turnSpeed;
+    }
+
+    if (
+        keyIsDown(RIGHT_ARROW) ||
+        keyIsDown(68) //'d' key
+    ) {
+        ship.desiredFacing += config.turnSpeed;
+    }
 }
