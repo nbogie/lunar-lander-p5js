@@ -4,15 +4,9 @@
  * @property {p5.Vector | null} selectedVertex
  * @property {LineSeg | null} selectedLineSeg
  * @property {p5.Vector|null} prevMousePos
+ * @property {{pos:p5.Vector}|null} camCentre
+ *
  */
-/**
- * @type {Editor} */
-let editor = {
-    selectionMode: "vertex",
-    selectedVertex: null,
-    selectedLineSeg: null,
-    prevMousePos: null,
-};
 
 const LOCAL_STORAGE_KEY_FOR_USER_TERRAIN_MAP = "userTerrainMap";
 const TERRAIN_DATA_VERSION = "0.0.1";
@@ -29,10 +23,23 @@ const TERRAIN_DATA_VERSION = "0.0.1";
  *
  */
 
+/**
+ * @param {World} world
+ * @returns {Editor}
+ */
+function createEditor(world) {
+    return {
+        selectionMode: "vertex",
+        selectedVertex: null,
+        selectedLineSeg: null,
+        prevMousePos: null,
+        camCentre: { pos: createVector(width / 2, height / 2) },
+    };
+}
 function drawNewTerrain() {
     const { lineSegs } = world.newTerrain;
     push();
-    strokeWeight(1);
+    strokeWeight(1 / world.cam.scale);
     stroke("magenta");
     fill(world.palette.landBackground);
     beginShape();
@@ -42,7 +49,7 @@ function drawNewTerrain() {
 
         if (seg === editor.selectedLineSeg) {
             push();
-            strokeWeight(3);
+            strokeWeight(3 / world.cam.scale);
             line(seg.a.x, seg.a.y, seg.b.x, seg.b.y);
             pop();
         }
@@ -66,7 +73,7 @@ function drawNewTerrain() {
         }
         const vertexCircleSize = editor.selectionMode === "vertex" ? 6 : 4;
 
-        circle(0, 0, vertexCircleSize);
+        circle(0, 0, vertexCircleSize / world.cam.scale);
 
         noStroke();
         textSize(14);
@@ -87,7 +94,7 @@ function drawNewTerrain() {
             noFill();
         }
 
-        circle(0, 0, midpointCircleSize);
+        circle(0, 0, midpointCircleSize / world.cam.scale);
         pop();
     }
 
@@ -135,6 +142,35 @@ function map1Points() {
  * @returns {p5.Vector[]}
  */
 function map2Points() {
+    /**
+     * @type [number, number][]
+     */
+    const ptsAsFractions = [
+        [-0.1, 0.8],
+        [0.4, 0.8],
+        [0.4, 0.2],
+        [0.5, 0.2],
+        [0.5, 0.3],
+        [0.44, 0.3],
+        [0.44, 0.5],
+        [0.5, 0.5],
+        [0.5, 0.8],
+        [0.9, 0.8],
+        [0.9, 0.4],
+        [0.75, 0.4],
+        [0.75, 0.3],
+        [1.1, 0.3],
+        [1.1, 1.1],
+        [0, 1.1],
+    ];
+    return convertScreenFractionsToPointVectors(ptsAsFractions);
+}
+
+/**
+ *
+ * @returns {p5.Vector[]}
+ */
+function map3MultiScreen() {
     /**
      * @type [number, number][]
      */
@@ -228,7 +264,20 @@ function selectNearestVertexToMouseOrNull() {
     }
 }
 
+function mouseWheel(event) {
+    if (!world.cam.isZooming) {
+        return;
+    }
+    //todo: move mouse-sensitivity to config / map-editor config
+    world.cam.desiredScale = constrain(world.cam.desiredScale + event.delta / 1000, 0.2, 10);
+}
+
 function mouseDragged() {
+    if (keyIsDown(ALT)) {
+        const mouseDelta = createVector(mouseX - pmouseX, mouseY - pmouseY);
+        editor.camCentre.pos.sub(mouseDelta);
+        return;
+    }
     if (editor.selectionMode === "vertex") {
         if (editor.selectedVertex) {
             moveVertex(editor.selectedVertex, mousePosAsVector());
@@ -237,8 +286,6 @@ function mouseDragged() {
     if (editor.selectionMode === "line" && editor.selectedLineSeg) {
         moveLineSeg(editor.selectedLineSeg);
     }
-    fill("lime");
-    circle(10, 10, 100);
 }
 
 /**

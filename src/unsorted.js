@@ -1,7 +1,3 @@
-function toggleZoom() {
-    world.cam.isZooming = !world.cam.isZooming;
-}
-
 function togglePause() {
     if (isLooping()) {
         noLoop();

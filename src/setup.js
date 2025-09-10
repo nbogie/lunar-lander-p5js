@@ -7,6 +7,7 @@ function setup() {
     p5Canvas = createCanvas(windowWidth, mainCanvasHeight);
 
     config.matter.enabled && setupMatterJS();
+
     frameRate(60);
     textFont("Courier New");
 
@@ -22,5 +23,7 @@ function restart() {
     noiseSeed(config.seed);
 
     world = createWorld();
+    editor = createEditor(world);
+
     respawnShip();
 }

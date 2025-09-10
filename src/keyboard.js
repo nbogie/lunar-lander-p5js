@@ -25,7 +25,7 @@ function keyPressed() {
     }
 
     if (key === "1") {
-        toggleZoom();
+        toggleZoomToShip();
     }
     if (key === "2") {
         toggleConfigBoolean("windEnabled", "wind");
@@ -41,6 +41,12 @@ function keyPressed() {
 
     if (key === "5") {
         toggleConfigBoolean("drawSunAsLines", "draw sun as lines");
+    }
+    if (key === "t") {
+        toggleConfigBoolean("drawNewTerrainEnabled", "draw new terrain - debugging");
+    }
+    if (key === "6") {
+        toggleMapEditorCamFollow();
     }
 
     if (key === "0" || key === "z") {

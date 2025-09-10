@@ -1,6 +1,8 @@
 # TODO:
 
 -   [ ] map editor: have mousePressed, mouseDragged, etc only registered when map editor is on.
+-   [ ] map editor: convert mouse positions from screen-space into world-space understanding current scale and translation.
+-   [ ] disable scroll-to-zoom when not in map editor mode
 -   [ ] BUG: crashing with "not close to ground" - though the crash otherwise looks legit.
 -   [ ] particles for refuel
 -   [ ] particles for stunt award

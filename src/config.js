@@ -15,6 +15,7 @@
  * @property {boolean} debugMessagesEnabled controls display of misc text output about the ship and world useful for debugging
  * @property {boolean} rainbowWindEnabled should the wind particles be rainbow coloured?
  * @property {boolean} drawSunAsLines how should the sun/planets be rendered?
+ * @property {boolean} drawNewTerrainEnabled (wip debugging)
  * @property {boolean} zenModeEnabled zen mode causes most non-essential visuals to be removed
  * @property {Object} zenModeBackup stores a copy of the config prior to toggling into zen mode, for later restoration
  * @property {{enabled: boolean, debugRendererEnabled: boolean}} matter config about the experimental use of matter.js
@@ -41,6 +42,7 @@ function createConfig() {
         rainbowWindEnabled: true,
         drawSunAsLines: true,
         zenModeEnabled: false,
+        drawNewTerrainEnabled: true,
         zenModeBackup: {},
         matter: {
             enabled: false, //if this is enabled, sketch restart and matter.js and poly-decomp libraries will be required
