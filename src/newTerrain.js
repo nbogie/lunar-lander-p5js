@@ -20,18 +20,24 @@ function drawNewTerrain() {
     for (let seg of lineSegs) {
         vertex(seg.a.x, seg.a.y);
         vertex(seg.b.x, seg.b.y);
+    }
+    endShape(CLOSE);
+
+    //annotate vertices
+    for (let seg of lineSegs) {
         push();
         translate(seg.a.x, seg.a.y);
         circle(0, 0, 4);
-        textSize(12);
+
         noStroke();
+        textSize(14);
         fill("lime");
         const fx = (seg.a.x / width).toFixed(2);
         const fy = (seg.a.y / height).toFixed(2);
-        text(`(${fx}, ${fy})`, 0, 0);
+        text(`(${fx}, ${fy})`, 5, -5);
         pop();
     }
-    endShape(CLOSE);
+
     pop();
 }
 
@@ -73,8 +79,8 @@ function map2Points() {
         [0.4, 0.2],
         [0.5, 0.2],
         [0.5, 0.3],
-        [0.45, 0.3],
-        [0.45, 0.5],
+        [0.44, 0.3],
+        [0.44, 0.5],
         [0.5, 0.5],
         [0.5, 0.8],
         [0.9, 0.8],
