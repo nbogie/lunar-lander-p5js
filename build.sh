@@ -24,6 +24,7 @@ FILES=(
     "globals.js"
     "landingPads.js"
     "messages.js"
+    "newTerrain.js"
     "palette.js"
     "scenery.js"
     "screenShake.js"

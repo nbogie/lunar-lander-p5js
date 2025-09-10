@@ -29,6 +29,7 @@ function draw() {
         drawWind();
     }
     drawTerrain();
+    drawNewTerrain();
 
     if (config.matter.enabled) {
         world.bodies.forEach(drawBall);

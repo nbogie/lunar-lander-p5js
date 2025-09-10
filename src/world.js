@@ -3,6 +3,7 @@
  
  * @property {Ship} ship - the player's ship
  * @property {Terrain} terrain
+ * @property {NewTerrain} newTerrain
  * @property {Explosion[]} explosions
  * @property {ThrustParticle[]} particles
  * @property {WindParticle[]} windParticles
@@ -26,6 +27,7 @@ function createWorld() {
     const createdWorld = {
         ship: createShip(palette),
         terrain: createTerrain(palette),
+        newTerrain: createNewTerrain(),
         explosions: [],
         particles: [],
         windParticles: createWindParticles(palette),
