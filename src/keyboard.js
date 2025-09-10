@@ -58,4 +58,8 @@ function keyPressed() {
     if (key === "q") {
         save("lunar-lander-screenshot");
     }
+
+    if (key === "[") {
+        toggleMapEditorSelectionMode();
+    }
 }

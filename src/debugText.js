@@ -27,8 +27,13 @@ function drawDebugText() {
     outputs.push({
         t: composeVerticalSpeedMessage(),
     });
+
     outputs.push({
         t: composeHorizontalSpeedMessage(),
+    });
+
+    outputs.push({
+        t: editor.selectionMode,
     });
 
     outputs.push({
