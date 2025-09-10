@@ -1,5 +1,6 @@
 # TODO:
 
+-   [ ] map editor: have mousePressed, mouseDragged, etc only registered when map editor is on.
 -   [ ] BUG: crashing with "not close to ground" - though the crash otherwise looks legit.
 -   [ ] particles for refuel
 -   [ ] particles for stunt award

@@ -61,3 +61,10 @@ function formatMillisecondsToMMSS(milliseconds) {
     const pad = (val) => val.toString().padStart(2, "0");
     return [minutes, seconds].map(pad).join(":");
 }
+
+/**
+ * @returns {p5.Vector} mouse position as vector (a new copy on each call).
+ */
+function mousePosAsVector() {
+    return createVector(mouseX, mouseY);
+}

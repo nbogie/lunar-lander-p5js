@@ -1,4 +1,16 @@
 /**
+ * @typedef {Object} Editor
+ * @property {"line"|"vertex"} selectionMode
+ * @property {p5.Vector | null} selectedVertex
+ * @property {LineSeg | null} selectedLineSeg
+ */
+let editor = {
+    selectionMode: "vertex",
+    selectedVertex: null,
+    selectedLineSeg: null,
+};
+
+/**
  * @typedef {Object} LineSeg
  * @property {p5.Vector} a
  * @property {p5.Vector} b
@@ -121,4 +133,44 @@ function createNewTerrainFromPoints(pts) {
     }
 
     return { lineSegs };
+}
+
+function moveVertex(selectedVertex, newPos) {
+    selectedVertex.x = snapTo(newPos.x, 50);
+    selectedVertex.y = snapTo(newPos.y, 50);
+}
+
+function mousePressed() {
+    const pts = allPointsFromNewTerrain(world.newTerrain);
+
+    const ptNearestMouse = minBy(pts, (pt) => pt.dist(mousePosAsVector()));
+    if (ptNearestMouse.dist(mousePosAsVector()) > 100) {
+        editor.selectedVertex = null;
+    } else {
+        editor.selectedVertex = ptNearestMouse;
+    }
+}
+
+function mouseDragged() {
+    if (editor.selectionMode === "vertex") {
+        if (editor.selectedVertex) {
+            moveVertex(editor.selectedVertex, mousePosAsVector());
+        }
+    }
+    fill("lime");
+    circle(10, 10, 100);
+}
+
+/**
+ *
+ * @param {NewTerrain} newTerrain
+ * @returns {p5.Vector[]}
+ */
+function allPointsFromNewTerrain(newTerrain) {
+    const pts = [];
+    for (let s of newTerrain.lineSegs) {
+        pts.push(s.a);
+    }
+    pts.push(newTerrain.lineSegs.at(-1).b);
+    return pts;
 }
