@@ -101,3 +101,12 @@ function createPhysicsBodyForTerrain(world) {
     }
     return terrainBody;
 }
+
+function drawBall(b) {
+    push();
+    noFill();
+    stroke(255);
+    circle(b.position.x, b.position.y, 2 * b.circleRadius);
+
+    pop();
+}

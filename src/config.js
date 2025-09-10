@@ -48,3 +48,47 @@ function createConfig() {
         },
     };
 }
+
+function toggleConfigBoolean(key, label) {
+    config[key] = !config[key];
+    const desc = config[key] ? "enabled" : "disabled";
+    postMessage(label + " " + desc);
+}
+
+function zenModePropertyKeys() {
+    return ["windEnabled", "debugMessagesEnabled", "starsEnabled"];
+}
+
+function saveConfigForZenMode() {
+    const backup = [];
+    for (let key of zenModePropertyKeys()) {
+        backup[key] = config[key];
+    }
+    return backup;
+}
+
+function toggleZenMode() {
+    config.zenModeEnabled = !config.zenModeEnabled;
+    if (config.zenModeEnabled) {
+        config.zenModeBackup = saveConfigForZenMode();
+        let delay = 0;
+        for (let key of zenModePropertyKeys()) {
+            setTimeout(() => (config[key] = false), delay);
+            delay += 500;
+        }
+        setTimeout(clearMessages, delay);
+    } else {
+        restoreConfigAfterZenMode();
+    }
+}
+
+function restoreConfigAfterZenMode() {
+    let delay = 0;
+    for (let key of [...zenModePropertyKeys()].reverse()) {
+        const savedVal = config.zenModeBackup[key];
+        if (savedVal !== undefined) {
+            setTimeout(() => (config[key] = savedVal), delay);
+            delay += 500;
+        }
+    }
+}

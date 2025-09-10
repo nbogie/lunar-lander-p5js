@@ -87,3 +87,7 @@ function composeVerticalSpeedMessage() {
     }
     return "v speed " + emoji + " " + world.ship.vel.y.toFixed(1);
 }
+
+function isFrameRateSlow(expectedRate, tolerance) {
+    return frameRate() < expectedRate * (1 - tolerance);
+}
