@@ -62,4 +62,10 @@ function keyPressed() {
     if (key === "[") {
         toggleMapEditorSelectionMode();
     }
+    if (key === "S") {
+        saveNewTerrainMapAsJSON();
+    }
+    if (key === "L") {
+        loadSavedTerrainMap();
+    }
 }

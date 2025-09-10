@@ -14,6 +14,9 @@ let editor = {
     prevMousePos: null,
 };
 
+const LOCAL_STORAGE_KEY_FOR_USER_TERRAIN_MAP = "userTerrainMap";
+const TERRAIN_DATA_VERSION = "0.0.1";
+
 /**
  * @typedef {Object} LineSeg
  * @property {p5.Vector} a
@@ -54,8 +57,16 @@ function drawNewTerrain() {
         const isLineSegSelected = seg === editor.selectedLineSeg;
 
         translate(pt.x, pt.y);
-        stroke(isLineSegSelected || isVertexSelected ? "yellow" : "magenta");
-        circle(0, 0, 4);
+        const vertexColour = isLineSegSelected || isVertexSelected ? "yellow" : "magenta";
+        stroke(vertexColour);
+        if (editor.selectionMode === "vertex") {
+            fill(vertexColour);
+        } else {
+            noFill();
+        }
+        const vertexCircleSize = editor.selectionMode === "vertex" ? 6 : 4;
+
+        circle(0, 0, vertexCircleSize);
 
         noStroke();
         textSize(14);
@@ -68,13 +79,31 @@ function drawNewTerrain() {
         push();
         const mp = p5.Vector.lerp(seg.a, seg.b, 0.5);
         translate(mp.x, mp.y);
-        noStroke();
-        fill("skyblue");
-        circle(0, 0, 5);
+        const midpointCircleSize = editor.selectionMode === "line" ? 6 : 4;
+        stroke("skyblue");
+        if (editor.selectionMode === "line") {
+            fill("skyblue");
+        } else {
+            noFill();
+        }
+
+        circle(0, 0, midpointCircleSize);
         pop();
     }
 
     pop();
+}
+
+function mapMinimalPoints() {
+    /**
+     * @type [number, number][]
+     */
+    const ptsAsFractions = [
+        [0.1, 0.5], //x of 0% of the canvas width, y of 50% of the canvas height
+        [0.3, 0.9],
+        [0.3, 0.5],
+    ];
+    return convertScreenFractionsToPointVectors(ptsAsFractions);
 }
 
 /**
@@ -139,6 +168,7 @@ function convertScreenFractionsToPointVectors(ptsAsFractions) {
 }
 
 function createNewTerrain() {
+    // const choices = [mapMinimalPoints()];
     const choices = [map1Points(), map2Points()];
     return createNewTerrainFromPoints(random(choices));
 }
@@ -165,6 +195,9 @@ function moveVertex(selectedVertex, newPos) {
 }
 
 function mousePressed() {
+    if (keyIsDown(SHIFT)) {
+        maybeAddVertexAtMouse();
+    }
     if (editor.selectionMode === "vertex") {
         selectNearestVertexToMouseOrNull();
     } else if (editor.selectionMode === "line") {
@@ -305,4 +338,101 @@ function areLineSegmentsIntersecting(seg1, seg2) {
 
     // An intersection exists if t and u are both between 0 and 1.
     return t > 0 && t <= 1 && u > 0 && u <= 1;
+}
+/**
+ * edits the terrain linesegs in place.
+ * @returns
+ */
+function maybeAddVertexAtMouse() {
+    //find nearest midpoint
+    const { lineSeg, distToMidpoint, midpoint } = findNearestLineSegMidpoint(mousePosAsVector());
+    if (distToMidpoint > 100) {
+        return;
+    }
+
+    //break that midpoint's lineseg into two lineseg's
+    //  original [A <-> B] becomes [A <-> MP] and new seg [MP <-> B]
+
+    const oldB = lineSeg.b;
+
+    //note that the same vertex is shared by both linesegs, so that if its position is changed, both linesegs reflect that.
+    lineSeg.b = midpoint;
+
+    /**
+     * @type {LineSeg}
+     */
+    const newLineSeg = { a: midpoint, b: oldB };
+    const ix = world.newTerrain.lineSegs.indexOf(lineSeg);
+    if (ix < 0) {
+        throw new Error("expected to find lineseg in terrain linesegs: " + JSON.stringify(lineSeg));
+    }
+
+    //insert the one new lineSeg into the array immediately after the one we are splitting
+    world.newTerrain.lineSegs.splice(ix + 1, 0, newLineSeg);
+
+    //switch into vertex select mode, select the newly created vertex, cancelling any previous lineseg selection
+    editor.selectionMode = "vertex";
+    editor.selectedLineSeg = null;
+    editor.selectedVertex = midpoint;
+}
+
+/**
+ *
+ * @param {p5.Vector} pos
+ * @returns {{lineSeg: LineSeg, distToMidpoint: number, midpoint: p5.Vector}}
+ */
+function findNearestLineSegMidpoint(pos) {
+    const fancySegs = world.newTerrain.lineSegs.map((lineSeg) => {
+        const midpoint = p5.Vector.lerp(lineSeg.a, lineSeg.b, 0.5);
+        const distToMidpoint = pos.dist(midpoint);
+        return { lineSeg, midpoint, distToMidpoint };
+    });
+
+    return minBy(fancySegs, (fs) => fs.distToMidpoint);
+}
+
+/**
+ * @typedef {Object} TerrainMapStorage
+ * @property {string} terrainDataVersion
+ * @property {[number, number][]}  data
+ */
+
+function saveNewTerrainMapAsJSON() {
+    /**
+     *
+     * @param {{x,y}} vector to simplify
+     * @returns {[number, number]}
+     */
+    function simplify({ x, y }) {
+        return [x, y];
+    }
+    const simplifiedData = world.newTerrain.lineSegs.map(({ a }) => simplify(a));
+    simplifiedData.push(simplify(world.newTerrain.lineSegs.at(-1).b));
+    /**
+     * @type TerrainMapStorage
+     */
+    const objectToStore = {
+        terrainDataVersion: TERRAIN_DATA_VERSION,
+        data: simplifiedData,
+    };
+    storeItem(LOCAL_STORAGE_KEY_FOR_USER_TERRAIN_MAP, objectToStore);
+    postMessage("saved map to local storage");
+    console.log(
+        "saved the following userTerrainMap to localstorage",
+        JSON.stringify(objectToStore, null, 2)
+    );
+}
+
+function loadSavedTerrainMap() {
+    /**@type TerrainMapStorage */
+    //@ts-ignore
+    const storedObject = getItem(LOCAL_STORAGE_KEY_FOR_USER_TERRAIN_MAP);
+
+    const { terrainDataVersion, data } = storedObject;
+    if (terrainDataVersion !== TERRAIN_DATA_VERSION) {
+        console.warn("won't load user terrain map - different version ${terrainDataVersion}");
+    }
+    world.newTerrain = createNewTerrainFromPoints(data.map(([x, y]) => createVector(x, y)));
+    // console.log("loaded user terrain map from localstorage: ", data);
+    postMessage("loaded map to local storage");
 }
