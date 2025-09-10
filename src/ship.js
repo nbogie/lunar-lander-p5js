@@ -16,6 +16,7 @@
  * @property {p5.Color} colour - colour of ship
  * @property {LandingCheckResult} lastLandingCheck - result of last landing check (cleared each frame)
  * @property {StuntMonitor} stuntMonitor
+ * @property {NewTerrainCollisionCheckResult} lastNewTerrainCollisionCheckResult
  */
 
 /**
@@ -35,7 +36,9 @@ function drawShip(ship) {
     rotate(ship.facing);
 
     stroke(255);
-    fill(ship.colour);
+    const colour =
+        ship.lastNewTerrainCollisionCheckResult === "inside" ? color("magenta") : ship.colour;
+    fill(colour);
     rectMode(CENTER);
     rect(0, 0, round(mainBodyHeight * 0.8), mainBodyHeight);
 
@@ -54,6 +57,15 @@ function drawShip(ship) {
     drawBooster();
     pop();
 
+    pop();
+
+    push();
+    const cornerPts = shipCornersInWorldSpace(ship);
+    for (const pt of cornerPts) {
+        noStroke();
+        fill("lime");
+        circle(pt.x, pt.y, 3);
+    }
     pop();
 }
 
@@ -177,6 +189,7 @@ function createShip(palette) {
         thrustColour: palette.all[2],
         colour: palette.skyBackground, //arr[5],
         lastLandingCheck: undefined,
+        lastNewTerrainCollisionCheckResult: undefined,
         stuntMonitor: createStuntMonitor(),
     };
     clearStunts(createdShip);
@@ -350,7 +363,8 @@ function updateShip(ship) {
     if (ship.state.type !== "landed") {
         handleUserSteering(ship);
     }
-
+    const collisionCheckResult = detectNewTerrainCollision(ship);
+    ship.lastNewTerrainCollisionCheckResult = collisionCheckResult;
     ship.facing = lerp(ship.facing, ship.desiredFacing, 0.1);
 
     if (ship.state.type === "landed") {
@@ -412,6 +426,18 @@ function fireThrusters() {
     world.ship.vel.add(thrustVec);
     world.ship.fuel -= config.fuelUsedPerTick;
     addParticleEffectsFromThrusters(thrustVec);
+}
+
+function shipCornersInWorldSpace(ship) {
+    const cornerOffsets = [
+        createVector(-10, -10),
+        createVector(-10, 10),
+        createVector(10, -10),
+        createVector(10, 10),
+    ];
+    return cornerOffsets.map((cornerOffset) =>
+        getRotatedPositionOfOffsetPoint(ship.pos, ship.facing, cornerOffset)
+    );
 }
 
 /**

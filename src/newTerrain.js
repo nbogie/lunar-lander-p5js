@@ -242,3 +242,59 @@ function moveLineSeg(selectedLineSeg) {
     }
     editor.prevMousePos = mousePosAsVector();
 }
+/**
+ *
+ * @param {Ship} ship
+ * @returns {NewTerrainCollisionCheckResult}
+ */
+function detectNewTerrainCollision(ship) {
+    const corners = shipCornersInWorldSpace(ship);
+    if (corners.some((corner) => isCollidingWithTerrain(corner, world.newTerrain) === "inside")) {
+        return "inside";
+    } else {
+        return "outside";
+    }
+}
+
+/**
+ * @typedef {'inside'|'outside'} NewTerrainCollisionCheckResult
+ */
+/**
+ * TODO: parts of this function were written by Gemini (AI)
+ * Determines if a point is inside, outside of a polygon. (on boundary is not considered)
+ * Method: ray-cast horizontally to the right from the given position and count how many line segments the ray intersects with.  even number of intersections means the point is outside the polygon assumed to be formed by the line-segments.
+ * @param {p5.Vector} p The point to check.
+ * @param {NewTerrain} terrain The terrain containing the line segments.
+ * @returns {NewTerrainCollisionCheckResult}
+ */
+function isCollidingWithTerrain(p, terrain) {
+    // Use the ray casting algorithm to check for inside/outside.
+    let intersections = 0;
+
+    // A ray extending to the right from point p //TODO: set this high enough that all possible segments will be considered - even on a big scrolling map
+    let rayPoint = createVector(p.x + 1000000, p.y);
+
+    for (let segment of terrain.lineSegs) {
+        // This is the core logic for a line-segment intersection test.
+        // It checks if the segments (p, rayPoint) and (p1, p2) intersect.
+
+        let { a, b } = segment;
+        let denominator = (a.x - b.x) * (p.y - rayPoint.y) - (a.y - b.y) * (p.x - rayPoint.x);
+
+        // If the denominator is 0, the segments are parallel.
+        if (denominator === 0) {
+            continue;
+        }
+
+        let t = ((a.x - p.x) * (p.y - rayPoint.y) - (a.y - p.y) * (p.x - rayPoint.x)) / denominator;
+        let u = -((a.x - b.x) * (a.y - p.y) - (a.y - b.y) * (a.x - p.x)) / denominator;
+
+        // An intersection exists if t and u are both between 0 and 1.
+        if (t > 0 && t <= 1 && u > 0 && u <= 1) {
+            intersections++;
+        }
+    }
+
+    // If the number of intersections is odd, the point is inside.
+    return intersections % 2 === 1 ? "inside" : "outside";
+}
