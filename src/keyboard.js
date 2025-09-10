@@ -24,6 +24,10 @@ function keyPressed() {
         toggleConfigBoolean("screenShakeEnabled", "screen-shake");
     }
 
+    if (key === "g") {
+        toggleConfigBoolean("gravityEnabled", "gravity");
+    }
+
     if (key === "1") {
         toggleZoomToShip();
     }

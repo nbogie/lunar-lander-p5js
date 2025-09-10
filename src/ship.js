@@ -371,11 +371,11 @@ function updateShip(ship) {
         return;
     }
     //accelerate ship with gravity...
-
-    const gravity = createVector(0, config.gravity);
-    ship.vel.add(gravity);
-
-    //...and (optionally) accelerate ship with wind
+    if (config.gravityEnabled) {
+        const gravity = createVector(0, config.gravity);
+        ship.vel.add(gravity);
+    }
+    //...and with wind
     if (config.windEnabled) {
         const windSpeed = createWindAt(ship.pos);
         ship.vel.x += windSpeed;

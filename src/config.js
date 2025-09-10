@@ -11,6 +11,7 @@
  * @property {boolean} windEnabled enable/disable wind system
  * @property {number} numWindParticles only relevant to the visualisation of the wind.  lower number for better performance
  * @property {boolean} screenShakeEnabled
+ * @property {boolean} gravityEnabled
  * @property {boolean} starsEnabled are stars visible?
  * @property {boolean} debugMessagesEnabled controls display of misc text output about the ship and world useful for debugging
  * @property {boolean} rainbowWindEnabled should the wind particles be rainbow coloured?
@@ -35,7 +36,8 @@ function createConfig() {
         refuelPerTick: 0.0035,
         windEnabled: true,
         numWindParticles: 500,
-        screenShakeEnabled: true,
+        screenShakeEnabled: false,
+        gravityEnabled: false,
         seed: 123, //set later
         starsEnabled: true,
         debugMessagesEnabled: true,
