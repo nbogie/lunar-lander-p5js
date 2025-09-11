@@ -359,7 +359,7 @@ function drawFuelBar(ship) {
  *
  * @param {Ship} ship
  */
-function refuelShipOneTick(ship) {
+function refuelShipOneTickFromNearestPad(ship) {
     const pad = landingPadAtXOrNull(ship.pos.x);
     const amtTransferred = config.refuelPerTick; // * deltaTime;
     ship.fuel = constrain(ship.fuel + amtTransferred, 0, 1);
@@ -367,6 +367,15 @@ function refuelShipOneTick(ship) {
     if (ship.fuel >= 1) {
         postMessage("Refuelling complete");
     }
+}
+
+/**
+ * @param {FuelTank} fuelTank
+ * @param {Ship} ship
+ */
+function refuelShipFromFuelTank(fuelTank, ship) {
+    ship.fuel = constrain(ship.fuel + 0.5, 0, 1);
+    postMessage("Got fuel!");
 }
 
 /**
@@ -380,7 +389,7 @@ function updateShip(ship) {
 
     if (ship.state.type === "landed") {
         if (ship.fuel < 1) {
-            refuelShipOneTick(ship);
+            refuelShipOneTickFromNearestPad(ship);
         }
     }
     let { tookOffThisFrame } = handleAnyUserThrust(ship);

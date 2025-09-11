@@ -96,3 +96,8 @@ function convertFromScreenSpaceToWorldSpace(ssPos) {
 function roundVec(inputVector) {
     return createVector(round(inputVector.x), round(inputVector.y));
 }
+
+function vectorToRoundedString(vec) {
+    const rounded = roundVec(vec);
+    return `${(rounded.x, rounded.y)}`;
+}

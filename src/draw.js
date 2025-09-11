@@ -14,6 +14,8 @@ function draw() {
 
     config.screenShakeEnabled && applyAnyScreenShake();
     updateShip(world.ship);
+    updateFuelTanks();
+
     updateParticles();
     updateProjectiles();
     config.starsEnabled && drawStarfield();
@@ -31,6 +33,9 @@ function draw() {
     }
     !config.disableOldTerrain && drawTerrain();
     config.drawNewTerrainEnabled && drawNewTerrain();
+
+    world.newTerrain.fuelTanks.forEach(drawFuelTank);
+
     drawMapEditorWorldSpaceUI();
 
     if (config.matter.enabled) {

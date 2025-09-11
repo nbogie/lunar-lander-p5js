@@ -21,6 +21,7 @@ FILES=(
     "camera.js"
     "explosions.js"
     "flavour.js"
+    "fuelTank.js"
     "globals.js"
     "landingPads.js"
     "messages.js"

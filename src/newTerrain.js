@@ -20,6 +20,7 @@ const TERRAIN_DATA_VERSION = "0.0.1";
 /**
  * @typedef {Object} NewTerrain
  * @property {LineSeg[]} lineSegs
+ * @property {FuelTank[]} fuelTanks
  *
  */
 
@@ -272,7 +273,7 @@ function createNewTerrainFromPoints(pts) {
         lineSegs.push({ a, b });
     }
 
-    return { lineSegs };
+    return { lineSegs, fuelTanks: [] };
 }
 
 function moveVertex(selectedVertex, newPos) {
@@ -284,6 +285,7 @@ function mousePressed() {
     if (keyIsDown(SHIFT)) {
         maybeAddVertexAtMouse();
     }
+
     if (editor.selectionMode === "vertex") {
         selectNearestVertexToMouseOrNull();
     } else if (editor.selectionMode === "line") {
@@ -529,30 +531,50 @@ function findNearestLineSegMidpoint(pos) {
 }
 
 /**
- * @typedef {Object} TerrainMapStorage
+ * @typedef {Object} TerrainMapStorageWithMeta
  * @property {string} terrainDataVersion
- * @property {[number, number][]}  data
+ * @property {TerrainMapData} data
  * @property {string} timestamp
  *
  */
+/**
+ * @typedef {Object} TerrainMapData
+ * @property {[number, number][]}  points
+ * @property {{pos: {x:number, y:number}, rotation: number}[]} fuelTanks
+ */
 
+/**
+ *
+ * @param {p5.Vector} vec
+ * @returns {{x:number, y:number}}
+ */
+function vectorToSimplerRoundedObject(vec) {
+    return { x: round(vec.x), y: round(vec.y) };
+}
+
+/**
+ *
+ * @param {{x,y}} vector to simplify
+ * @returns {[number, number]}
+ */
+function vectorToArray({ x, y }) {
+    return [x, y];
+}
 function saveNewTerrainMapAsJSON() {
+    const simplifiedPoints = world.newTerrain.lineSegs.map(({ a }) => vectorToArray(a));
+    simplifiedPoints.push(vectorToArray(world.newTerrain.lineSegs.at(-1).b));
     /**
-     *
-     * @param {{x,y}} vector to simplify
-     * @returns {[number, number]}
-     */
-    function simplify({ x, y }) {
-        return [x, y];
-    }
-    const simplifiedData = world.newTerrain.lineSegs.map(({ a }) => simplify(a));
-    simplifiedData.push(simplify(world.newTerrain.lineSegs.at(-1).b));
-    /**
-     * @type TerrainMapStorage
+     * @type TerrainMapStorageWithMeta
      */
     const objectToStore = {
         terrainDataVersion: TERRAIN_DATA_VERSION,
-        data: simplifiedData,
+        data: {
+            points: simplifiedPoints,
+            fuelTanks: world.newTerrain.fuelTanks.map((ft) => ({
+                pos: vectorToSimplerRoundedObject(ft.pos),
+                rotation: ft.rotation,
+            })),
+        },
         timestamp: new Date().toString(),
     };
     storeItem(LOCAL_STORAGE_KEY_FOR_USER_TERRAIN_MAP, objectToStore);
@@ -564,7 +586,7 @@ function saveNewTerrainMapAsJSON() {
 }
 
 function loadSavedTerrainMap() {
-    /**@type TerrainMapStorage */
+    /**@type TerrainMapStorageWithMeta */
     //@ts-ignore
     const storedObject = getItem(LOCAL_STORAGE_KEY_FOR_USER_TERRAIN_MAP);
 
@@ -572,8 +594,12 @@ function loadSavedTerrainMap() {
     if (terrainDataVersion !== TERRAIN_DATA_VERSION) {
         console.warn("won't load user terrain map - different version ${terrainDataVersion}");
     }
-    world.newTerrain = createNewTerrainFromPoints(data.map(([x, y]) => createVector(x, y)));
-    // console.log("loaded user terrain map from localstorage: ", data);
+    world.newTerrain = createNewTerrainFromPoints(data.points.map(([x, y]) => createVector(x, y)));
+
+    world.newTerrain.fuelTanks = data.fuelTanks.map((ft) =>
+        createFuelTank(createVector(ft.pos.x, ft.pos.y), ft.rotation)
+    );
+
     postMessage("loaded map to local storage");
 }
 
@@ -677,4 +703,15 @@ function findAllLineSegmentIntersections(oneSeg, otherSegs) {
             }
         })
         .filter((intersectionOrNull) => intersectionOrNull !== null);
+}
+
+function snapVectorTo(inputVec, gridSize) {
+    return createVector(...[inputVec.x, inputVec.y].map((val) => snapTo(val, gridSize)));
+}
+function editorAddFuelTankAtMouse() {
+    const pos = mousePosAsWorldSpaceVector();
+    const snappedPos = snapVectorTo(pos, 50);
+
+    world.newTerrain.fuelTanks.push(createFuelTank(snappedPos, 0));
+    postMessage("added fuel tank at " + vectorToRoundedString(snappedPos));
 }

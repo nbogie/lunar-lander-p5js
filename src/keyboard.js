@@ -83,8 +83,11 @@ function keyPressed() {
     if (key === "L") {
         loadSavedTerrainMap();
     }
-    if (key === "f") {
+    if (key === "F") {
         toggleConfigBoolean("vertexLabelsAsFractions", "vertex labels as fractions");
+    }
+    if (key === "f") {
+        editorAddFuelTankAtMouse();
     }
     if (key === "v") {
         toggleConfigBoolean("newTerrainVertexAnnotationEnabled", "vertex annotation");
