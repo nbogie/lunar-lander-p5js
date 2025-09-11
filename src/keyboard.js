@@ -78,4 +78,7 @@ function keyPressed() {
     if (key === "L") {
         loadSavedTerrainMap();
     }
+    if (key === "f") {
+        toggleConfigBoolean("vertexLabelsAsFractions", "vertex labels as fractions");
+    }
 }

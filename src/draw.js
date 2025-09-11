@@ -30,6 +30,7 @@ function draw() {
     }
     drawTerrain();
     config.drawNewTerrainEnabled && drawNewTerrain();
+    drawMapEditorWorldSpaceUI();
 
     if (config.matter.enabled) {
         world.bodies.forEach(drawBall);
@@ -44,6 +45,7 @@ function draw() {
 
     config.debugMessagesEnabled && drawDebugText();
     pop(); //end effect of screenshake
+    drawMapEditorScreenSpaceUI();
 
     updateExplosions();
     updateAnyScreenShake();

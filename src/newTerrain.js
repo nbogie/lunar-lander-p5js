@@ -80,7 +80,10 @@ function drawNewTerrain() {
         fill("lime");
         const fx = (seg.a.x / width).toFixed(2);
         const fy = (seg.a.y / height).toFixed(2);
-        text(`(${fx}, ${fy})`, 5, -5);
+        const vertexLabelText = config.vertexLabelsAsFractions
+            ? `(${fx}, ${fy})`
+            : `(${seg.a.x.toFixed(0)}, ${seg.a.y.toFixed(0)})`;
+        text(vertexLabelText, 5, -5);
         pop();
 
         push();
@@ -174,25 +177,39 @@ function map3MultiScreen() {
     /**
      * @type [number, number][]
      */
-    const ptsAsFractions = [
-        [-0.1, 0.8],
-        [0.4, 0.8],
-        [0.4, 0.2],
-        [0.5, 0.2],
-        [0.5, 0.3],
-        [0.44, 0.3],
-        [0.44, 0.5],
-        [0.5, 0.5],
-        [0.5, 0.8],
-        [0.9, 0.8],
-        [0.9, 0.4],
-        [0.75, 0.4],
-        [0.75, 0.3],
-        [1.1, 0.3],
-        [1.1, 1.1],
-        [0, 1.1],
+    const points = [
+        [-174, 485],
+        [600, 450],
+        [592, 77],
+        [773, 49],
+        [772, 124],
+        [644, 123],
+        [653, 303],
+        [873, 303],
+        [886, 265],
+        [986, 265],
+        [1000, 300],
+        [950, 400],
+        [911.5, 442.5],
+        [900, 500],
+        [1100, 500],
+        [1099, 1858],
+        [450, 1850],
+        [450, 2050],
+        [1100, 2050],
+        [1507, 2050],
+        [1506, 1858],
+        [1400, 650],
+        [1400, 500],
+        [1571, 485],
+        [1571, 242],
+        [1309, 242],
+        [1309, 182],
+        [1920, 182],
+        [1929, 2272],
+        [9, 2272],
     ];
-    return convertScreenFractionsToPointVectors(ptsAsFractions);
+    return points.map((pts) => createVector(...pts));
 }
 
 /**
@@ -205,7 +222,7 @@ function convertScreenFractionsToPointVectors(ptsAsFractions) {
 
 function createNewTerrain() {
     // const choices = [mapMinimalPoints()];
-    const choices = [map1Points(), map2Points()];
+    const choices = [map1Points(), map2Points(), map3MultiScreen()];
     return createNewTerrainFromPoints(random(choices));
 }
 
@@ -244,11 +261,14 @@ function mousePressed() {
 function selectNearestLineSegToMouseOrNull() {
     const segs = world.newTerrain.lineSegs;
     const nearest = minBy(segs, (seg) =>
-        p5.Vector.lerp(seg.a, seg.b, 0.5).dist(mousePosAsVector())
+        p5.Vector.lerp(seg.a, seg.b, 0.5).dist(mousePosAsWorldSpaceVector())
     );
-    if (nearest && p5.Vector.lerp(nearest.a, nearest.b, 0.5).dist(mousePosAsVector()) < 100) {
+    if (
+        nearest &&
+        p5.Vector.lerp(nearest.a, nearest.b, 0.5).dist(mousePosAsWorldSpaceVector()) < 100
+    ) {
         editor.selectedLineSeg = nearest;
-        editor.prevMousePos = mousePosAsVector();
+        editor.prevMousePos = mousePosAsWorldSpaceVector();
     } else {
         editor.selectedLineSeg = null;
     }
@@ -256,8 +276,8 @@ function selectNearestLineSegToMouseOrNull() {
 function selectNearestVertexToMouseOrNull() {
     const pts = allPointsFromNewTerrain(world.newTerrain);
 
-    const ptNearestMouse = minBy(pts, (pt) => pt.dist(mousePosAsVector()));
-    if (ptNearestMouse.dist(mousePosAsVector()) > 100) {
+    const ptNearestMouse = minBy(pts, (pt) => pt.dist(mousePosAsWorldSpaceVector()));
+    if (ptNearestMouse.dist(mousePosAsWorldSpaceVector()) > 100) {
         editor.selectedVertex = null;
     } else {
         editor.selectedVertex = ptNearestMouse;
@@ -274,13 +294,15 @@ function mouseWheel(event) {
 
 function mouseDragged() {
     if (keyIsDown(ALT)) {
+        const wMouse = mousePosAsWorldSpaceVector();
+        const wPMouse = mousePrevPosAsWorldSpaceVector();
         const mouseDelta = createVector(mouseX - pmouseX, mouseY - pmouseY);
         editor.camCentre.pos.sub(mouseDelta);
         return;
     }
     if (editor.selectionMode === "vertex") {
         if (editor.selectedVertex) {
-            moveVertex(editor.selectedVertex, mousePosAsVector());
+            moveVertex(editor.selectedVertex, mousePosAsWorldSpaceVector());
         }
     }
     if (editor.selectionMode === "line" && editor.selectedLineSeg) {
@@ -312,7 +334,7 @@ function toggleMapEditorSelectionMode() {
  * @param {LineSeg} selectedLineSeg
  */
 function moveLineSeg(selectedLineSeg) {
-    const mouseDelta = p5.Vector.sub(mousePosAsVector(), editor.prevMousePos);
+    const mouseDelta = p5.Vector.sub(mousePosAsWorldSpaceVector(), editor.prevMousePos);
     const pts = [selectedLineSeg.a, selectedLineSeg.b];
     const isHoriz = abs(mouseDelta.x) > abs(mouseDelta.y);
     if (isHoriz) {
@@ -320,7 +342,7 @@ function moveLineSeg(selectedLineSeg) {
     } else {
         pts.map((pt) => (pt.y += mouseDelta.y));
     }
-    editor.prevMousePos = mousePosAsVector();
+    editor.prevMousePos = mousePosAsWorldSpaceVector();
 }
 /**
  *
@@ -392,7 +414,9 @@ function areLineSegmentsIntersecting(seg1, seg2) {
  */
 function maybeAddVertexAtMouse() {
     //find nearest midpoint
-    const { lineSeg, distToMidpoint, midpoint } = findNearestLineSegMidpoint(mousePosAsVector());
+    const { lineSeg, distToMidpoint, midpoint } = findNearestLineSegMidpoint(
+        mousePosAsWorldSpaceVector()
+    );
     if (distToMidpoint > 100) {
         return;
     }
@@ -482,4 +506,57 @@ function loadSavedTerrainMap() {
     world.newTerrain = createNewTerrainFromPoints(data.map(([x, y]) => createVector(x, y)));
     // console.log("loaded user terrain map from localstorage: ", data);
     postMessage("loaded map to local storage");
+}
+
+function drawMapEditorWorldSpaceUI() {
+    push();
+
+    //world-space origin
+    circle(0, 0, 20);
+    noStroke();
+    fill("red");
+    textSize(20);
+    textAlign(CENTER, CENTER);
+    text("(0,0)", 0, 0);
+
+    //circle at mouse world-space co-ords, to check them
+    const p = mousePosAsWorldSpaceVector();
+    translate(p.x, p.y);
+    noFill();
+    stroke(255);
+    strokeWeight(1 / world.cam.scale);
+    circle(0, 0, 30);
+    circle(0, 0, 2);
+
+    noStroke();
+    fill(255);
+    textSize(14);
+    text("worldspace: " + p.x.toFixed(0) + ", " + p.y.toFixed(0), 0, 30);
+    pop();
+}
+
+function drawMapEditorScreenSpaceUI() {
+    push();
+    const worldSpacePos = mousePosAsWorldSpaceVector();
+    const screenSpacePos = mousePosAsScreenSpaceVector();
+    noFill();
+    stroke(255);
+    strokeWeight(1 / world.cam.scale);
+    const lines = [
+        "mouse: ",
+        "mpos screen: " + screenSpacePos.x + ", " + screenSpacePos.y,
+        "mpos world: " + worldSpacePos.x + ", " + worldSpacePos.y,
+    ];
+    if (world.cam.tracked) {
+        lines.push("tracked: " + world.cam.tracked.pos.x + ", " + world.cam.tracked.pos.y);
+    }
+
+    const lineHeight = 20;
+    translate(10, height - lines.length * lineHeight);
+    for (let line of lines) {
+        text(line, 0, 0);
+        translate(0, lineHeight);
+    }
+
+    pop();
 }

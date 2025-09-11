@@ -65,6 +65,26 @@ function formatMillisecondsToMMSS(milliseconds) {
 /**
  * @returns {p5.Vector} mouse position as vector (a new copy on each call).
  */
-function mousePosAsVector() {
+function mousePosAsScreenSpaceVector() {
     return createVector(mouseX, mouseY);
+}
+
+function mousePosAsWorldSpaceVector() {
+    const screenSpacePos = mousePosAsScreenSpaceVector();
+    return convertFromScreenSpaceToWorldSpace(screenSpacePos);
+}
+
+function mousePrevPosAsWorldSpaceVector() {
+    return convertFromScreenSpaceToWorldSpace(createVector(pmouseX, pmouseY));
+}
+
+function convertFromScreenSpaceToWorldSpace(ssPos) {
+    if (!world.cam.tracked) {
+        return ssPos.copy();
+    }
+    const offset = world.cam.tracked.pos;
+    const screenCentre = createVector(width / 2, height / 2);
+    //TODO: adjust for the camera's current scaling
+    const scaling = world.cam.scale;
+    return ssPos.add(offset).sub(screenCentre);
 }
