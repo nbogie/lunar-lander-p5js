@@ -6,6 +6,7 @@
  * @property {NewTerrain} newTerrain
  * @property {Explosion[]} explosions
  * @property {ThrustParticle[]} particles
+ * @property {Projectile[]} projectiles
  * @property {WindParticle[]} windParticles
  * @property {Star[]} stars
  * @property {Message[]} messages
@@ -28,6 +29,7 @@ function createWorld() {
         ship: createShip(palette),
         terrain: createTerrain(palette),
         newTerrain: createNewTerrain(),
+        projectiles: [],
         explosions: [],
         particles: [],
         windParticles: createWindParticles(palette),

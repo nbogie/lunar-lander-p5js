@@ -67,3 +67,10 @@ function checkIsOkForLanding(ship) {
     //...
 }
 ```
+
+## Naming conventions
+
+-   createX(): create and return an X object, without adding it to the world.
+-   spawnX(): create an X object and record it in the world.
+-   handleAnyUserX(): check for user input and accordingly trigger any associated X (e.g. steering, thrust, weapon fire).
+-   processShipX: e.g. processShipLiftOff(). called once we've established that the ship should be put into state X to do so and to carry out associated changes.

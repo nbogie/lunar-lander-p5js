@@ -4,6 +4,12 @@
  */
 
 /**
+ * @typedef {Object} WeaponSystem
+ * @property {number} lastFiredMillis
+ * @property {number} cooldownMillis
+ */
+
+/**
  * @typedef {Object} Ship
  * @property {LandedFlyingState} state - whether the ship is landed / flying / respawning, etc.
  * @property {p5.Vector} pos - position in world-space
@@ -17,6 +23,7 @@
  * @property {LandingCheckResult} lastLandingCheck - result of last landing check (cleared each frame)
  * @property {StuntMonitor} stuntMonitor
  * @property {NewTerrainCollisionCheckResult} lastNewTerrainCollisionCheckResult
+ * @property {WeaponSystem} weaponSystem
  * //TODO: consider aliasing bugs caused by  holding references here to line segments, vertices, etc.
  * @property {GroundClearanceInfo|null} groundClearanceOnNewTerrain - info about what's beneath the ship!
  *
@@ -206,6 +213,7 @@ function createShip(palette) {
         lastLandingCheck: undefined,
         lastNewTerrainCollisionCheckResult: undefined,
         groundClearanceOnNewTerrain: null,
+        weaponSystem: createDefaultWeapon(),
         stuntMonitor: createStuntMonitor(),
     };
     clearStunts(createdShip);
@@ -232,9 +240,10 @@ function cheatSetShipForEasyLanding(ship) {
     };
 }
 
-function spawnPosition() {
+function shipSpawnPosition() {
     return createVector(100, 50);
 }
+
 /**
  * @param {Ship} ship - ship to update
  */
@@ -244,7 +253,7 @@ function setShipUprightImmediately(ship) {
 }
 
 function respawnShip() {
-    world.ship.pos = spawnPosition();
+    world.ship.pos = shipSpawnPosition();
     world.ship.vel = createVector(0, 0);
     setShipUprightImmediately(world.ship);
     world.ship.fuel = 1;
@@ -374,10 +383,11 @@ function updateShip(ship) {
             refuelShipOneTick(ship);
         }
     }
-    let { tookOffThisFrame } = handleUserThrust(ship);
+    let { tookOffThisFrame } = handleAnyUserThrust(ship);
+    handleAnyUserWeaponFiring(ship);
 
     if (ship.state.type !== "landed") {
-        handleUserSteering(ship);
+        handleAnyUserSteering(ship);
     }
 
     const collisionCheckResult = detectNewTerrainCollision(ship);
@@ -451,6 +461,17 @@ function fireThrusters() {
     addParticleEffectsFromThrusters(thrustVec);
 }
 
+/**
+ *
+ * @param {Ship} ship
+ */
+function fireWeapon(ship) {
+    const projectileSpeed = 3;
+    const velocity = p5.Vector.fromAngle(world.ship.facing, projectileSpeed).add(world.ship.vel);
+    spawnProjectile(ship.pos.copy(), velocity);
+    ship.weaponSystem.lastFiredMillis = millis();
+}
+
 function shipCornersInWorldSpace(ship) {
     const cornerOffsets = [
         createVector(-10, -10),
@@ -508,7 +529,7 @@ function getRotatedPositionOfOffsetPoint(parentPos, parentRotation, relativePosi
  * @param {Ship} ship
  * @returns {{tookOffThisFrame:boolean}} indicates if the thrust action has caused lift-off (if we were landed)
  */
-function handleUserThrust(ship) {
+function handleAnyUserThrust(ship) {
     if (
         keyIsDown(UP_ARROW) ||
         keyIsDown(87) //'w' key
@@ -528,7 +549,7 @@ function handleUserThrust(ship) {
  * take user inputs and steer ship accordingly
  * @param {Ship} ship
  */
-function handleUserSteering(ship) {
+function handleAnyUserSteering(ship) {
     if (
         keyIsDown(LEFT_ARROW) ||
         keyIsDown(65) //'a' key
@@ -542,4 +563,26 @@ function handleUserSteering(ship) {
     ) {
         ship.desiredFacing += config.turnSpeed;
     }
+}
+/**
+ *
+ * @param {Ship} ship
+ */
+function handleAnyUserWeaponFiring(ship) {
+    const { lastFiredMillis, cooldownMillis } = ship.weaponSystem;
+    if (keyIsDown(SHIFT)) {
+        if (lastFiredMillis + cooldownMillis < millis()) {
+            fireWeapon(ship);
+        }
+    }
+}
+
+/**
+ * @returns {WeaponSystem}
+ */
+function createDefaultWeapon() {
+    return {
+        lastFiredMillis: -1000000,
+        cooldownMillis: 300,
+    };
 }

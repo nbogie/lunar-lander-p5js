@@ -26,6 +26,7 @@ FILES=(
     "messages.js"
     "newTerrain.js"
     "palette.js"
+    "projectiles.js"
     "scenery.js"
     "screenShake.js"
     "stars.js"

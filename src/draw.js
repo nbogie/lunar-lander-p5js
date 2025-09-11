@@ -15,6 +15,7 @@ function draw() {
     config.screenShakeEnabled && applyAnyScreenShake();
     updateShip(world.ship);
     updateParticles();
+    updateProjectiles();
     config.starsEnabled && drawStarfield();
     if (config.drawSunAsLines) {
         drawSunWithHorizontalLines();
@@ -37,6 +38,7 @@ function draw() {
     }
 
     drawThrustParticles();
+    drawProjectiles();
     drawShip(world.ship);
     drawLastLandingCheckWarning(world.ship);
 
