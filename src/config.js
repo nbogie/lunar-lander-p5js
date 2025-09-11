@@ -18,6 +18,7 @@
  * @property {boolean} drawSunAsLines how should the sun/planets be rendered?
  * @property {boolean} disableOldTerrain (wip debugging)
  * @property {boolean} drawNewTerrainEnabled (wip debugging)
+ * @property {boolean} newTerrainVertexAnnotationEnabled
  * @property {boolean} vertexLabelsAsFractions
  * @property {boolean} zenModeEnabled zen mode causes most non-essential visuals to be removed
  * @property {Object} zenModeBackup stores a copy of the config prior to toggling into zen mode, for later restoration
@@ -32,6 +33,7 @@ function createConfig() {
         turnSpeed: 0.18,
         thrust: 0.15,
         gravity: 0.01,
+        gravityEnabled: true,
         xStep: 15,
         padWidth: 90, //should be a multiple of xStep
         fuelUsedPerTick: 0.005,
@@ -39,7 +41,6 @@ function createConfig() {
         windEnabled: true,
         numWindParticles: 500,
         screenShakeEnabled: false,
-        gravityEnabled: false,
         seed: 123, //set later
         starsEnabled: true,
         debugMessagesEnabled: true,
@@ -49,6 +50,7 @@ function createConfig() {
         disableOldTerrain: true,
         drawNewTerrainEnabled: true,
         vertexLabelsAsFractions: false,
+        newTerrainVertexAnnotationEnabled: true,
         zenModeBackup: {},
         matter: {
             enabled: false, //if this is enabled, sketch restart and matter.js and poly-decomp libraries will be required

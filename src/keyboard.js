@@ -86,4 +86,7 @@ function keyPressed() {
     if (key === "f") {
         toggleConfigBoolean("vertexLabelsAsFractions", "vertex labels as fractions");
     }
+    if (key === "v") {
+        toggleConfigBoolean("newTerrainVertexAnnotationEnabled", "vertex annotation");
+    }
 }

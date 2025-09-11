@@ -55,7 +55,18 @@ function drawNewTerrain() {
         }
     }
     endShape(CLOSE);
+    if (config.newTerrainVertexAnnotationEnabled) {
+        annotateVerticesAndMidpoints(lineSegs);
+    }
 
+    pop();
+}
+
+/**
+ *
+ * @param {LineSeg[]} lineSegs
+ */
+function annotateVerticesAndMidpoints(lineSegs) {
     //annotate vertices
     for (let seg of lineSegs) {
         push();
@@ -64,6 +75,7 @@ function drawNewTerrain() {
         const isLineSegSelected = seg === editor.selectedLineSeg;
 
         translate(pt.x, pt.y);
+
         const vertexColour =
             isLineSegSelected || isVertexSelected
                 ? world.palette.mapEditor.selectedVertex
@@ -75,8 +87,8 @@ function drawNewTerrain() {
         } else {
             noFill();
         }
-        const vertexCircleSize = editor.selectionMode === "vertex" ? 6 : 4;
 
+        const vertexCircleSize = editor.selectionMode === "vertex" ? 6 : 4;
         circle(0, 0, vertexCircleSize / world.cam.scale);
 
         noStroke();
@@ -88,6 +100,7 @@ function drawNewTerrain() {
             ? `(${fx}, ${fy})`
             : `(${seg.a.x.toFixed(0)}, ${seg.a.y.toFixed(0)})`;
         text(vertexLabelText, 5, -5);
+
         pop();
 
         push();
@@ -104,8 +117,6 @@ function drawNewTerrain() {
         circle(0, 0, midpointCircleSize / world.cam.scale);
         pop();
     }
-
-    pop();
 }
 
 function mapMinimalPoints() {
