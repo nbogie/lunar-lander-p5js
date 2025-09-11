@@ -28,7 +28,7 @@ function createWorld() {
     const createdWorld = {
         ship: createShip(palette),
         terrain: createTerrain(palette),
-        newTerrain: createNewTerrain(),
+        newTerrain: createNewTerrain(palette),
         projectiles: [],
         explosions: [],
         particles: [],

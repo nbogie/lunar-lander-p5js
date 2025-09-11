@@ -187,6 +187,127 @@ function map2Points() {
 
 /**
  *
+ * @returns {TerrainMapStorageWithMeta}
+ */
+function map4WithFuelTanks() {
+    return {
+        terrainDataVersion: "0.0.1",
+        data: {
+            points: [
+                [-50, 500],
+                [581, 499],
+                [573, 110],
+                [773, 83],
+                [774, 159],
+                [650, 162],
+                [657, 307],
+                [873, 303],
+                [900, 250],
+                [1000, 250],
+                [1000, 300],
+                [950, 400],
+                [814.5, 442.5],
+                [804, 504],
+                [798, 803],
+                [898, 803],
+                [901, 504],
+                [1050, 500],
+                [1050, 450],
+                [1150, 450],
+                [1150, 500],
+                [1150, 500],
+                [1300, 500],
+                [1300, 600],
+                [1150, 600],
+                [1100, 650],
+                [1100, 1150],
+                [50, 1150],
+                [50, 1450],
+                [50, 2050],
+                [300, 2050],
+                [900, 2050],
+                [900, 1700],
+                [300, 1700],
+                [300, 1500],
+                [950, 1500],
+                [950, 1600],
+                [1400, 1600],
+                [1400, 650],
+                [1400, 500],
+                [1571, 485],
+                [1550, 300],
+                [1350, 300],
+                [1350, 200],
+                [1650, 200],
+                [1920, 182],
+                [1929, 2272],
+                [-50, 2272],
+                [-50, 500],
+            ],
+            fuelTanks: [
+                {
+                    pos: {
+                        x: 250,
+                        y: 500,
+                    },
+                    rotation: 0,
+                },
+                {
+                    pos: {
+                        x: 1150,
+                        y: 500,
+                    },
+                    rotation: 0,
+                },
+                {
+                    pos: {
+                        x: 1100,
+                        y: 450,
+                    },
+                    rotation: 0,
+                },
+                {
+                    pos: {
+                        x: 1450,
+                        y: 200,
+                    },
+                    rotation: 0,
+                },
+                {
+                    pos: {
+                        x: 950,
+                        y: 250,
+                    },
+                    rotation: 0,
+                },
+                {
+                    pos: {
+                        x: 800,
+                        y: 2050,
+                    },
+                    rotation: 0,
+                },
+                {
+                    pos: {
+                        x: 400,
+                        y: 2050,
+                    },
+                    rotation: 0,
+                },
+                {
+                    pos: {
+                        x: 850,
+                        y: 800,
+                    },
+                    rotation: 0,
+                },
+            ],
+        },
+        timestamp: "Thu Sep 11 2025 18:09:31 GMT+0100 (British Summer Time)",
+    };
+}
+/**
+ *
  * @returns {p5.Vector[]}
  */
 function map3MultiScreen() {
@@ -254,10 +375,32 @@ function convertScreenFractionsToPointVectors(ptsAsFractions) {
     return ptsAsFractions.map(([fx, fy]) => createVector(round(fx * width), round(fy * height)));
 }
 
-function createNewTerrain() {
+/**
+ *
+ * @param {Palette} palette
+ * @returns {NewTerrain}
+ */
+function createNewTerrain(palette) {
     // const choices = [mapMinimalPoints()];
-    const choices = [map1Points(), map2Points(), map3MultiScreen()];
-    return createNewTerrainFromPoints(random(choices));
+    // const choices = [map1Points(), map2Points(), map3MultiScreen()];
+    // return createNewTerrainFromPoints(random(choices));
+    return createNewTerrainFromMapData(map4WithFuelTanks(), palette);
+}
+
+/**
+ *
+ * @param {TerrainMapStorageWithMeta} dataWithMeta
+ * @param {Palette} palette
+ * @returns {NewTerrain}
+ */
+function createNewTerrainFromMapData(dataWithMeta, palette) {
+    const data = dataWithMeta.data;
+    const terrain = createNewTerrainFromPoints(data.points.map(([x, y]) => createVector(x, y)));
+
+    terrain.fuelTanks = data.fuelTanks.map((ft) =>
+        createFuelTank(createVector(ft.pos.x, ft.pos.y), ft.rotation, palette)
+    );
+    return terrain;
 }
 
 /**
@@ -594,13 +737,9 @@ function loadSavedTerrainMap() {
     if (terrainDataVersion !== TERRAIN_DATA_VERSION) {
         console.warn("won't load user terrain map - different version ${terrainDataVersion}");
     }
-    world.newTerrain = createNewTerrainFromPoints(data.points.map(([x, y]) => createVector(x, y)));
 
-    world.newTerrain.fuelTanks = data.fuelTanks.map((ft) =>
-        createFuelTank(createVector(ft.pos.x, ft.pos.y), ft.rotation)
-    );
-
-    postMessage("loaded map to local storage");
+    world.newTerrain = createNewTerrainFromMapData(storedObject, world.palette);
+    postMessage("loaded map from local storage");
 }
 
 function drawMapEditorWorldSpaceUI() {
@@ -712,6 +851,6 @@ function editorAddFuelTankAtMouse() {
     const pos = mousePosAsWorldSpaceVector();
     const snappedPos = snapVectorTo(pos, 50);
 
-    world.newTerrain.fuelTanks.push(createFuelTank(snappedPos, 0));
+    world.newTerrain.fuelTanks.push(createFuelTank(snappedPos, 0, world.palette));
     postMessage("added fuel tank at " + vectorToRoundedString(snappedPos));
 }

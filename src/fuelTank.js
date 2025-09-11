@@ -10,14 +10,15 @@
 /**
  * @param {p5.Vector} pos - position of pivot point
  * @param {number} rotation
+ * @param {Palette} palette
  * @returns {FuelTank}
  */
 
-function createFuelTank(pos, rotation) {
+function createFuelTank(pos, rotation, palette) {
     return {
         pos: pos.copy(),
         rotation: rotation,
-        colour: random(world.palette.bases),
+        colour: random(palette.bases),
         tractoredStreakStartMillis: undefined,
         isDead: false,
     };
