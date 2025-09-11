@@ -40,7 +40,7 @@ function drawNewTerrain() {
     const { lineSegs } = world.newTerrain;
     push();
     strokeWeight(1 / world.cam.scale);
-    stroke("magenta");
+    stroke(world.palette.mapEditor.terrain);
     fill(world.palette.landBackground);
     beginShape();
     for (let seg of lineSegs) {
@@ -64,7 +64,11 @@ function drawNewTerrain() {
         const isLineSegSelected = seg === editor.selectedLineSeg;
 
         translate(pt.x, pt.y);
-        const vertexColour = isLineSegSelected || isVertexSelected ? "yellow" : "magenta";
+        const vertexColour =
+            isLineSegSelected || isVertexSelected
+                ? world.palette.mapEditor.selectedVertex
+                : world.palette.mapEditor.vertex;
+
         stroke(vertexColour);
         if (editor.selectionMode === "vertex") {
             fill(vertexColour);
@@ -77,7 +81,7 @@ function drawNewTerrain() {
 
         noStroke();
         textSize(14);
-        fill("lime");
+        fill(world.palette.mapEditor.vertexText);
         const fx = (seg.a.x / width).toFixed(2);
         const fy = (seg.a.y / height).toFixed(2);
         const vertexLabelText = config.vertexLabelsAsFractions
@@ -90,9 +94,9 @@ function drawNewTerrain() {
         const mp = p5.Vector.lerp(seg.a, seg.b, 0.5);
         translate(mp.x, mp.y);
         const midpointCircleSize = editor.selectionMode === "line" ? 6 : 4;
-        stroke("skyblue");
+        stroke(world.palette.mapEditor.midpoint);
         if (editor.selectionMode === "line") {
-            fill("skyblue");
+            fill(world.palette.mapEditor.midpoint);
         } else {
             noFill();
         }
