@@ -16,6 +16,7 @@
  * @property {boolean} debugMessagesEnabled controls display of misc text output about the ship and world useful for debugging
  * @property {boolean} rainbowWindEnabled should the wind particles be rainbow coloured?
  * @property {boolean} drawSunAsLines how should the sun/planets be rendered?
+ * @property {boolean} disableOldTerrain (wip debugging)
  * @property {boolean} drawNewTerrainEnabled (wip debugging)
  * @property {boolean} vertexLabelsAsFractions
  * @property {boolean} zenModeEnabled zen mode causes most non-essential visuals to be removed
@@ -45,6 +46,7 @@ function createConfig() {
         rainbowWindEnabled: true,
         drawSunAsLines: true,
         zenModeEnabled: false,
+        disableOldTerrain: true,
         drawNewTerrainEnabled: true,
         vertexLabelsAsFractions: false,
         zenModeBackup: {},

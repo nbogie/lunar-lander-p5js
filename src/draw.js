@@ -9,7 +9,7 @@ function draw() {
 
     if (world.cam.isZooming) {
         const offset = calcScaledOffsetForFollowCam();
-        translate(offset.x, offset.y);
+        translate(round(offset.x), round(offset.y)); //TODO: always round, or only at scale 1 where we round up to pixel units?
     }
 
     config.screenShakeEnabled && applyAnyScreenShake();
@@ -28,7 +28,7 @@ function draw() {
         world.windParticles.forEach(updateWindParticle);
         drawWind();
     }
-    drawTerrain();
+    !config.disableOldTerrain && drawTerrain();
     config.drawNewTerrainEnabled && drawNewTerrain();
     drawMapEditorWorldSpaceUI();
 

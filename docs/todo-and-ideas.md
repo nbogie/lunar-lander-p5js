@@ -1,7 +1,12 @@
 # TODO:
 
+-   [ ] allow refueling in new-terrain mode (tractor-beam it or wind-scoop it)
+-   [ ] raycast downwards to get ground clearance and whatever line-seg is underneath us. mark some linesegs randomly as landing pads for now.
+-   [ ] add projectiles
+-   [ ] add enemy placements
+-   [ ] disable effect of wind on ship below a certain height (or raycast from ship to check if exposed?)
 -   [ ] map editor: have mousePressed, mouseDragged, etc only registered when map editor is on.
--   [ ] map editor: convert mouse positions from screen-space into world-space understanding current scale and translation.
+-   [ ] map editor: consider current scale when converting mouse positions from screen-space into world-space
 -   [ ] disable scroll-to-zoom when not in map editor mode
 -   [ ] BUG: crashing with "not close to ground" - though the crash otherwise looks legit.
 -   [ ] particles for refuel

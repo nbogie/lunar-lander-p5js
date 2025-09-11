@@ -178,8 +178,8 @@ function map3MultiScreen() {
      * @type [number, number][]
      */
     const points = [
-        [-174, 485],
-        [600, 450],
+        [-50, 500],
+        [600, 500],
         [592, 77],
         [773, 49],
         [772, 124],
@@ -193,12 +193,18 @@ function map3MultiScreen() {
         [911.5, 442.5],
         [900, 500],
         [1100, 500],
-        [1099, 1858],
-        [450, 1850],
-        [450, 2050],
-        [1100, 2050],
-        [1507, 2050],
-        [1506, 1858],
+        [1100, 1150],
+        [50, 1150],
+        [50, 1450],
+        [50, 2050],
+        [300, 2050],
+        [900, 2050],
+        [900, 1700],
+        [300, 1700],
+        [300, 1500],
+        [950, 1500],
+        [950, 1600],
+        [1400, 1600],
         [1400, 650],
         [1400, 500],
         [1571, 485],
@@ -207,7 +213,8 @@ function map3MultiScreen() {
         [1309, 182],
         [1920, 182],
         [1929, 2272],
-        [9, 2272],
+        [-50, 2272],
+        [-50, 500],
     ];
     return points.map((pts) => createVector(...pts));
 }
@@ -466,6 +473,8 @@ function findNearestLineSegMidpoint(pos) {
  * @typedef {Object} TerrainMapStorage
  * @property {string} terrainDataVersion
  * @property {[number, number][]}  data
+ * @property {string} timestamp
+ *
  */
 
 function saveNewTerrainMapAsJSON() {
@@ -485,13 +494,14 @@ function saveNewTerrainMapAsJSON() {
     const objectToStore = {
         terrainDataVersion: TERRAIN_DATA_VERSION,
         data: simplifiedData,
+        timestamp: new Date().toString(),
     };
     storeItem(LOCAL_STORAGE_KEY_FOR_USER_TERRAIN_MAP, objectToStore);
     postMessage("saved map to local storage");
-    console.log(
-        "saved the following userTerrainMap to localstorage",
-        JSON.stringify(objectToStore, null, 2)
-    );
+    const string = JSON.stringify(objectToStore, null, 2);
+    saveStrings([string], "lunar-lander-map.txt");
+
+    console.log("saved the following userTerrainMap to localstorage", string);
 }
 
 function loadSavedTerrainMap() {

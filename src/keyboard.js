@@ -49,6 +49,11 @@ function keyPressed() {
     if (key === "t") {
         toggleConfigBoolean("drawNewTerrainEnabled", "draw new terrain - debugging");
     }
+
+    if (key === "o") {
+        toggleConfigBoolean("disableOldTerrain", "disable old terrain - debugging");
+    }
+
     if (key === "6") {
         toggleMapEditorCamFollow();
     }

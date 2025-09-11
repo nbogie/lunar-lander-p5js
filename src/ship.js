@@ -363,13 +363,16 @@ function updateShip(ship) {
     if (ship.state.type !== "landed") {
         handleUserSteering(ship);
     }
+
     const collisionCheckResult = detectNewTerrainCollision(ship);
     ship.lastNewTerrainCollisionCheckResult = collisionCheckResult;
+
     ship.facing = lerp(ship.facing, ship.desiredFacing, 0.1);
 
     if (ship.state.type === "landed") {
         return;
     }
+
     //accelerate ship with gravity...
     if (config.gravityEnabled) {
         const gravity = createVector(0, config.gravity);
@@ -382,6 +385,10 @@ function updateShip(ship) {
     }
 
     ship.pos.add(ship.vel);
+
+    if (config.disableOldTerrain) {
+        return;
+    }
 
     if (!tookOffThisFrame) {
         const landingCheck = checkIsOkForLanding(ship);
