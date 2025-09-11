@@ -24,7 +24,7 @@ function createStar() {
     return {
         colour: color(random() > 0.93 ? random(["skyblue", "pink"]) : 255),
         size: random(0.4, 1),
-        pos: createVector(random(width), random(height)),
+        pos: createVector(random(-0.5, 1.5) * width, random(-0.5, 1) * height),
     };
 }
 
