@@ -1,3 +1,32 @@
+/**
+ * @typedef {Object} ThrustParticle
+ * @property {p5.Vector} pos
+ * @property {p5.Vector} vel
+ * @property {boolean} isDead
+ * @property {number} startFrame
+ * @property {number} maxAge
+ * @property {p5.Color} colour
+ * @property {number} size
+ */
+
+/**
+ * @param {p5.Vector} pos
+ * @param {p5.Vector} vel
+ * @param {p5.Color} colour
+ * @returns {ThrustParticle}
+ */
+function createThrustParticle(pos, vel, colour) {
+    return {
+        pos: pos.copy(),
+        vel: vel.copy(),
+        isDead: false,
+        startFrame: frameCount,
+        maxAge: random(60, 120),
+        colour,
+        size: random([1, 2]),
+    };
+}
+
 function updateParticles() {
     world.particles.forEach(updateParticle);
     world.particles = world.particles.filter((p) => !p.isDead);
@@ -35,32 +64,4 @@ function updateParticle(p) {
     if (frameCount - p.startFrame > p.maxAge) {
         p.isDead = true;
     }
-}
-/**
- * @typedef {Object} ThrustParticle
- * @property {p5.Vector} pos
- * @property {p5.Vector} vel
- * @property {boolean} isDead
- * @property {number} startFrame
- * @property {number} maxAge
- * @property {p5.Color} colour
- * @property {number} size
- */
-
-/**
- * @param {p5.Vector} pos
- * @param {p5.Vector} vel
- * @param {p5.Color} colour
- * @returns {ThrustParticle}
- */
-function createThrustParticle(pos, vel, colour) {
-    return {
-        pos: pos.copy(),
-        vel: vel.copy(),
-        isDead: false,
-        startFrame: frameCount,
-        maxAge: random(60, 120),
-        colour,
-        size: random([1, 2]),
-    };
 }
