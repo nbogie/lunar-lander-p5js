@@ -41,11 +41,11 @@ function draw() {
     drawLastLandingCheckWarning(world.ship);
 
     world.explosions.forEach(drawExplosion);
-    drawMessages();
 
-    config.debugMessagesEnabled && drawDebugText();
     pop(); //end effect of screenshake
+    config.debugMessagesEnabled && drawDebugText();
     drawMapEditorScreenSpaceUI();
+    drawMessages();
 
     updateExplosions();
     updateAnyScreenShake();

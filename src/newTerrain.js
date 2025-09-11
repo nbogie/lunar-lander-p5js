@@ -547,8 +547,8 @@ function drawMapEditorWorldSpaceUI() {
 
 function drawMapEditorScreenSpaceUI() {
     push();
-    const worldSpacePos = mousePosAsWorldSpaceVector();
-    const screenSpacePos = mousePosAsScreenSpaceVector();
+    const worldSpacePos = roundVec(mousePosAsWorldSpaceVector());
+    const screenSpacePos = roundVec(mousePosAsScreenSpaceVector());
     noFill();
     stroke(255);
     strokeWeight(1 / world.cam.scale);
@@ -557,8 +557,10 @@ function drawMapEditorScreenSpaceUI() {
         "mpos screen: " + screenSpacePos.x + ", " + screenSpacePos.y,
         "mpos world: " + worldSpacePos.x + ", " + worldSpacePos.y,
     ];
+
     if (world.cam.tracked) {
-        lines.push("tracked: " + world.cam.tracked.pos.x + ", " + world.cam.tracked.pos.y);
+        const tracked = roundVec(world.cam.tracked.pos);
+        lines.push("tracked: " + tracked.x + ", " + tracked.y);
     }
 
     const lineHeight = 20;

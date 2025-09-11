@@ -88,3 +88,11 @@ function convertFromScreenSpaceToWorldSpace(ssPos) {
     const scaling = world.cam.scale;
     return ssPos.add(offset).sub(screenCentre);
 }
+
+/**
+ * @param {p5.Vector} inputVector
+ * @returns {p5.Vector} new (2d) vector with components rounded to nearest int
+ */
+function roundVec(inputVector) {
+    return createVector(round(inputVector.x), round(inputVector.y));
+}
