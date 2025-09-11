@@ -17,6 +17,9 @@
  * @property {LandingCheckResult} lastLandingCheck - result of last landing check (cleared each frame)
  * @property {StuntMonitor} stuntMonitor
  * @property {NewTerrainCollisionCheckResult} lastNewTerrainCollisionCheckResult
+ * //TODO: consider aliasing bugs caused by  holding references here to line segments, vertices, etc.
+ * @property {GroundClearanceInfo|null} groundClearanceOnNewTerrain - info about what's beneath the ship!
+ *
  */
 
 /**
@@ -66,6 +69,7 @@ function drawShip(ship) {
         fill("lime");
         circle(pt.x, pt.y, 3);
     }
+
     pop();
 }
 
@@ -76,6 +80,17 @@ function drawShipOverlay(ship) {
     push();
     translate(0, -20);
     drawFuelBar(ship);
+
+    const clearance = ship.groundClearanceOnNewTerrain;
+    if (clearance) {
+        push();
+        noStroke();
+        fill("yellow");
+        textAlign(CENTER, CENTER);
+        text(round(clearance.distance), 0, -20);
+        pop();
+    }
+
     pop();
 }
 
@@ -190,6 +205,7 @@ function createShip(palette) {
         colour: palette.skyBackground, //arr[5],
         lastLandingCheck: undefined,
         lastNewTerrainCollisionCheckResult: undefined,
+        groundClearanceOnNewTerrain: null,
         stuntMonitor: createStuntMonitor(),
     };
     clearStunts(createdShip);
@@ -366,7 +382,7 @@ function updateShip(ship) {
 
     const collisionCheckResult = detectNewTerrainCollision(ship);
     ship.lastNewTerrainCollisionCheckResult = collisionCheckResult;
-
+    ship.groundClearanceOnNewTerrain = calcNewTerrainGroundClearance(ship);
     ship.facing = lerp(ship.facing, ship.desiredFacing, 0.1);
 
     if (ship.state.type === "landed") {
