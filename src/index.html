@@ -4,18 +4,17 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>🚀 Lunar Lander p5.js</title>
-        <script
-            src="https://cdn.jsdelivr.net/npm/p5@1.11.9/lib/p5.js"
-            type="text/javascript"
-        ></script>
-        <script
-            src="https://cdn.jsdelivr.net/gh/liabru/matter-js@0.18.0/build/matter.js"
-            type="text/javascript"
-        ></script>
-        <script
-            src="https://cdn.jsdelivr.net/npm/poly-decomp@0.2.1/build/decomp.min.js"
-            type="text/javascript"
-        ></script>
+        <!-- For local (possibly offline) development, we'll keep local copies of libraries.
+          for easy deployment on openprocessing we'll just link CDN-hosted versions of the libraries.  -->
+        <!-- src="https://cdn.jsdelivr.net/npm/p5@1.11.10/lib/p5.js" -->
+        <script src="/lib/p5-1.11.10.js" type="text/javascript"></script>
+
+        <!-- src="https://cdn.jsdelivr.net/gh/liabru/matter-js@0.18.0/build/matter.js" -->
+        <script src="/lib/matter-0.18.0.js" type="text/javascript"></script>
+
+        <!-- needed by matterjs for its concave hull decomposition
+         src="https://cdn.jsdelivr.net/npm/poly-decomp@0.2.1/build/decomp.min.js" -->
+        <script src="/lib/decomp-0.2.1.min.js" type="text/javascript"></script>
 
         <script src="camera.js" type="text/javascript"></script>
         <script src="config.js" type="text/javascript"></script>
