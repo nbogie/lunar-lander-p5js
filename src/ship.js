@@ -1,15 +1,4 @@
 /**
- * @typedef {Object} LandedFlyingState
- * @property {"flying"|"landed"} type
- */
-
-/**
- * @typedef {Object} WeaponSystem
- * @property {number} lastFiredMillis
- * @property {number} cooldownMillis
- */
-
-/**
  * @typedef {Object} Ship
  * @property {LandedFlyingState} state - whether the ship is landed / flying / respawning, etc.
  * @property {p5.Vector} pos - position in world-space
@@ -27,6 +16,17 @@
  * //TODO: consider aliasing bugs caused by  holding references here to line segments, vertices, etc.
  * @property {GroundClearanceInfo|null} groundClearanceOnNewTerrain - info about what's beneath the ship!
  *
+ */
+
+/**
+ * @typedef {Object} LandedFlyingState
+ * @property {"flying"|"landed"} type
+ */
+
+/**
+ * @typedef {Object} WeaponSystem
+ * @property {number} lastFiredMillis
+ * @property {number} cooldownMillis
  */
 
 /**
