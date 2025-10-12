@@ -1,11 +1,11 @@
 // This file will add types for both p5 instanced and global modes
-// It lets vscode (or other advanced editors) know about what functions and variables are available in p5.js
+// It lets typescript (run behind the scenes by vscode or other advanced editors) know about what functions and variables are available in p5.js
 // and what types those functions they accept and return.
-// This enables intellisense - auto-completion, inline documentation, and type checking.
+// In such editors, this enables intellisense - auto-completion, inline documentation, as well as type checking.
 //
 // iirc, I originally copied this from https://github.com/Gaweph/p5-typescript-starter
 
-//All that's needed for global-mode, if we're not referring to the p5 types in JSDocs
+//This like is all that's needed for global-mode, if we're not referring to the p5 types in JSDocs
 import * as p5Global from "p5/global";
 
 // These are needed to make the types available for use in jsdoc comments.
