@@ -74,4 +74,7 @@ function updateProjectile(p) {
     if (frameCount - p.startFrame > p.maxAge) {
         p.isDead = true;
     }
+    if (isCollidingWithNewTerrain(p.pos, world.newTerrain) === "inside") {
+        p.isDead = true;
+    }
 }

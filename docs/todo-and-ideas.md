@@ -1,8 +1,6 @@
 # TODO:
 
--   [ ] allow refueling in new-terrain mode (tractor-beam it or wind-scoop it)
 -   [ ] raycast downwards to get ground clearance and whatever line-seg is underneath us. mark some linesegs randomly as landing pads for now.
--   [ ] add projectiles
 -   [ ] add enemy placements
 -   [ ] disable effect of wind on ship below a certain height (or raycast from ship to check if exposed?)
 -   [ ] map editor: have mousePressed, mouseDragged, etc only registered when map editor is on.
@@ -68,3 +66,6 @@
 
 -   [x] move ILS msg under nearest base. remove it if not near a base
 -   [x] add support for adws keys
+-   [x] add projectiles
+    -   [x] have them stop at new terrain
+-   [x] allow refueling in new-terrain mode (tractor-beam it or wind-scoop it)
