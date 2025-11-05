@@ -23,6 +23,7 @@
     "license": "ISC",
     "author": "nbogie",
     "devDependencies": {
+        "p5": "^2.1.0-rc.2",
         "rimraf": "^6.0.1"
     },
     "directories": {
