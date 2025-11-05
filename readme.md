@@ -23,6 +23,18 @@ npm i
 
 If you don't have node.js installed but want to develop with type-checking, see later notes on downloading and using a local copy of the p5 library's new `global.d.ts`.
 
+## Building for openprocessing
+
+The project code is in multiple files. To make it easy to copy to openprocessing, you can run:
+
+```bash
+npm run build
+```
+
+and a single js file will be output to dist/compiled.js
+
+If you want to check _this_ file, you can open dist/index.html in your browser.
+
 # About project setup
 
 This is a minimal html + _JS_ project with minimal bundling requirements.
