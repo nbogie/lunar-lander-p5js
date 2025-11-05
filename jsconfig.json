@@ -3,5 +3,5 @@
         "checkJs": true,
         "lib": ["ESNext", "dom"]
     },
-    "exclude": ["node_modules", "dist"]
+    "include": ["node_modules/p5/types/global.d.ts", "src/**/*.js"]
 }

@@ -1,5 +1,3 @@
-/// <reference path="../node_modules/p5/types/global.d.ts" />
-
 /**
  * @typedef {Object} Ship
  * @property {LandedFlyingState} state - whether the ship is landed / flying / respawning, etc.
