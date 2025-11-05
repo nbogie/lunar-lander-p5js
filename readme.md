@@ -6,6 +6,23 @@ Also at https://openprocessing.org/sketch/2711492
 
 Started: 30Aug2025 for WCCChallenge "Pump"
 
+# Install
+
+This project doesn't require to be built in order to run.
+
+1. open `src/index.html` from a web server like live server.
+2. play the game!
+
+## Development
+
+For type-checking you will need to install the p5.js v2 package just for its types, as follows:
+
+```bash
+npm i
+```
+
+If you don't have node.js installed but want to develop with type-checking, see later notes on downloading and using a local copy of the p5 library's new `global.d.ts`.
+
 # About project setup
 
 This is a minimal html + _JS_ project with minimal bundling requirements.
