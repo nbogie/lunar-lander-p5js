@@ -129,3 +129,7 @@ function checkIsOkForLanding(ship) {
 -   spawnX(): create an X object and record it in the world.
 -   handleAnyUserX(): check for user input and accordingly trigger any associated X (e.g. steering, thrust, weapon fire).
 -   processShipX: e.g. processShipLiftOff(). called once we've established that the ship should be put into state X to do so and to carry out associated changes.
+
+# Current type-issues between 1.x and 2.1.0-rc.2
+
+I can't pass a value of type `{number[] | string}` to `fill()` or `background()`.
