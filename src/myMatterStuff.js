@@ -9,6 +9,8 @@ const Engine = Matter.Engine,
     Common = Matter.Common,
     Bodies = Matter.Bodies;
 
+let engine;
+
 function setupMatterJS() {
     engine = Engine.create();
     config.matter.debugRendererEnabled && setupMatterJSDebugRenderer();
@@ -44,6 +46,7 @@ function createInitialPhysicsBodies(world) {
 //See https://github.com/liabru/matter-js/blob/master/examples/terrain.js and https://brm.io/matter-js/demo/#terrain
 function createPhysicsBodyForTerrain(world) {
     //if poly-decomp is loaded by the browser (with a script tag), a global variable "decomp" will be available
+    //@ts-ignore
     Common.setDecomp(decomp);
     //or for other packaging methods
     // Common.setDecomp(require("poly-decomp"));
