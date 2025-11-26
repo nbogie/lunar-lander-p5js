@@ -10,6 +10,10 @@ Started: 30Aug2025 for WCCChallenge "Pump"
 
 This is a minimal html + js project with no node or bundling requirements.
 
+### node is not required
+
+You may see there is some node.js config present but it is *only* used to build a single-file version of the code for easier publishing on openprocessing.  Node is absolutely not required to develop or play the game locally, nor to deploy it to a webserver in its multi-file form.
+
 # Minimal setup for type-checking a global-mode p5 project in vscode
 
 By adding the following `jsconfig.json` and `global.t.ds` to the project root directory, we get type-checking and intellisense (auto-completion, doc lookup) in vscode.
