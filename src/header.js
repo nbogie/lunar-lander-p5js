@@ -4,7 +4,7 @@
     https://openprocessing.org/sketch/2711492
     
     Also on github at https://github.com/nbogie/lunar-lander-p5js
-
+	 
     This is a quick attempt at implementing a "lunar-lander"/"thrust" style game.
     So far, the pump theme isn't very strong in this one, but I though i'd submit for fun as I did write it for the challenge.     
     
@@ -25,5 +25,6 @@
     Join the Birb's Nest Discord for friendly creative coding community
     and future challenges and contributions: https://discord.gg/S8c7qcjw2b
    
-    
+	 If you're curious, on the github repo, there is a work-in-progress branch there that allows you to fly into a the cavern.
+	 I'm following the old game "Thrust" on BBC micro.  https://github.com/nbogie/lunar-lander-p5js/tree/new-terrain
 */
